@@ -1,0 +1,34 @@
+name: appmoviles
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # --- DEPENDENCIAS PRINCIPALES DEL PROYECTO ---
+  supabase_flutter: ^2.10.3
+  flutter_riverpod: ^3.0.3
+  go_router: ^17.0.0
+  flutter_dotenv: ^6.0.0
+
+  # (Opcional pero recomendado)
+  intl: ^0.19.0
+  http: ^1.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - .env
