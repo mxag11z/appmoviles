@@ -13,10 +13,19 @@ class StudentModel {
 
   factory StudentModel.fromMap(Map<String, dynamic> map) {
     return StudentModel(
-      idUsuario: map["id_usuario"],
-      carreraFK: map["carreraFK"],
+      idUsuario: map["id_estudiante"],
+      carreraFK: map["carrerafk"],
       semestre: map["semestre"],
       intereses: List<String>.from(map["intereses"] ?? []),
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      "id_estudiante": idUsuario,
+      "carrerafk": carreraFK,
+      "semestre": semestre,
+      "intereses": intereses,
+    };
   }
 }

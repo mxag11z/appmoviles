@@ -28,11 +28,11 @@ class StorageService {
       final fileName = "$userId.$ext";
 
       await supabase.storage
-          .from("perfiles")
+          .from("profiles")
           .upload(fileName, file, fileOptions: const FileOptions(upsert: true));
 
       //return the url to be stored on the database 
-      return supabase.storage.from("perfiles").getPublicUrl(fileName);
+      return supabase.storage.from("profiles").getPublicUrl(fileName);
 
     } catch (e) {
       print("Error subiendo imagen: $e");

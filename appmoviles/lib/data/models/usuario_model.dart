@@ -5,7 +5,6 @@ class Usuario {
   final String apellidoMaterno;
   final String email;
   final int rol;
-  final List<String> intereses;
   final String? foto;
 
   Usuario({
@@ -15,7 +14,6 @@ class Usuario {
     required this.apellidoMaterno,
     required this.email,
     required this.rol,
-    required this.intereses,
     this.foto,
   });
 
@@ -24,11 +22,10 @@ class Usuario {
     return Usuario(
       idUsuario: map['id_usuario'],
       nombre: map['nombre'],
-      apellidoPaterno: map['apellidoPaterno'],
-      apellidoMaterno: map['apellidoMaterno'],
+      apellidoPaterno: map['ap_paterno'],
+      apellidoMaterno: map['ap_materno'],
       email: map['email'],
-      rol: map['rolFK'],
-      intereses: List<String>.from(map['intereses'] ?? []),
+      rol: map['rolfk'],
       foto: map['foto'],
     );
   }
@@ -38,11 +35,10 @@ class Usuario {
     return {
       'id_usuario': idUsuario,
       'nombre': nombre,
-      'apellidoPaterno':apellidoPaterno,
-      'apellidoMaterno':apellidoMaterno,
+      'ap_paterno':apellidoPaterno,
+      'ap_materno':apellidoMaterno,
       'email': email,
-      'rolFK': rol,
-      'intereses': intereses,
+      'rolfk': rol,
       'foto': foto,
     };
   }

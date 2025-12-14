@@ -1,23 +1,21 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'dart:io';
+import 'package:appmoviles/data/models/usuario_model.dart';
+import 'package:appmoviles/data/models/student_model.dart';
 
 class AuthService {
   final supabase = Supabase.instance.client;
 
   Future<String?> registerUser({
-    required String nombre,
-    required String apellidoPaterno,
-    required String apellidoMaterno,
-    required String email,
+    required Usuario usuario,
     required String password,
-    required int rol,
-    required List<String> intereses,
+    StudentModel? estudiante, 
     File? fotoFile,
   }) async {
     try {
-      // registro de auth
+      //Registro en Auth
       final authResponse = await supabase.auth.signUp(
-        email: email,
+        email: usuario.email,
         password: password,
       );
 
@@ -27,52 +25,65 @@ class AuthService {
 
       final userId = authResponse.user!.id;
 
-      // si existe fotografia subirla
+      //Subir foto si existe
       String? fotoUrl;
       if (fotoFile != null) {
         final ext = fotoFile.path.split('.').last;
         final fileName = "$userId.$ext";
 
-        await supabase.storage.from("perfiles").upload(
+        await supabase.storage.from("profiles").upload(
           fileName,
           fotoFile,
           fileOptions: const FileOptions(upsert: true),
         );
 
-        fotoUrl = supabase.storage.from("perfiles").getPublicUrl(fileName);
+        fotoUrl = supabase.storage.from("profiles").getPublicUrl(fileName);
       }
 
-      // insercion de usuarios
-      await supabase.from("usuario").insert({
-        "id_usuario": userId,
-        "nombre": nombre,
-        "ap_paterno": apellidoPaterno,
-        "ap_materno": apellidoMaterno,
-        "email": email,
-        "rol": rol,
-        "foto": fotoUrl
-      });
+      // Construir el usuario definitivo (con id + foto)
+      final usuarioDb = Usuario(
+        idUsuario: userId,
+        nombre: usuario.nombre,
+        apellidoPaterno: usuario.apellidoPaterno,
+        apellidoMaterno: usuario.apellidoMaterno,
+        email: usuario.email,
+        rol: usuario.rol,
+        foto: fotoUrl,
+      );
 
-      //manejo de roles
-      if (rol == 1) {
+      // Guardar en tabla usuario 
+      await supabase.from("usuario").upsert(
+            usuarioDb.toMap(),
+            onConflict: "id_usuario",
+          );
+
+      // Manejo de roles
+      if (usuario.rol == 1 && estudiante != null) {
         // ESTUDIANTE
-        await supabase.from("estudiante").insert({
-          "id_usuario": userId,
-          "carreraFK": 1, // pendiente selector de carrera
-          "semestre": 1,  // pendiente pedir semestre
-          "intereses": intereses,
-        });
+        final estudianteDb = StudentModel(
+          idUsuario: userId,
+          carreraFK: estudiante.carreraFK,
+          semestre: estudiante.semestre,
+          intereses: estudiante.intereses,
+        );
+
+        await supabase.from("estudiante").upsert(
+          estudianteDb.toMap(),
+          onConflict: "id_estudiante",
+        );
       }
 
-      if (rol == 2) {
+      if (usuario.rol == 2) {
         // ORGANIZADOR
-        await supabase.from("organizador").insert({
-          "id_usuario": userId,
-        });
+        await supabase.from("organizador").upsert(
+          {
+            "id_usuario": userId,
+          },
+          onConflict: "id_usuario",
+        );
       }
 
       return null;
-
     } on AuthException catch (e) {
       return e.message;
     } catch (e) {

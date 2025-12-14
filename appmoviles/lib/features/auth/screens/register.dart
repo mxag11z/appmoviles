@@ -5,6 +5,10 @@ import 'package:appmoviles/services/storage_service.dart';
 import 'package:appmoviles/services/user_service.dart';
 import 'package:appmoviles/core/widgets/profile_image_picker.dart';
 import 'dart:io';
+import 'package:appmoviles/data/models/usuario_model.dart';
+import 'package:appmoviles/data/models/student_model.dart';
+import 'package:appmoviles/services/carreras_service.dart';
+import 'package:appmoviles/data/models/carrera_model.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -26,9 +30,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final userService = UserService();
   final authService = AuthService();
 
-  int selectedRole = 1;
+  int selectedRole = 1; // 1, estudiante, 2, organizador
   List<String> selectedInterests = [];
+
   final ipnRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@alumno\.ipn\.mx$');
+
+  // para estudiante
+  int? selectedCareer; // id carrera
+  int? selectedSemester; //
 
   List<String> intereses = [
     "Tecnología",
@@ -39,26 +48,58 @@ class _RegisterScreenState extends State<RegisterScreen> {
     "Cine",
   ];
 
+  final carrerasService = CarrerasService();
+  List<CarreraModel> carreras = [];
+  bool loadingCarreras = true;
+  String? carrerasError; 
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCarreras();
+  }
+
+  Future<void> _loadCarreras() async {
+    setState(() {
+      loadingCarreras = true;
+      carrerasError = null;
+    });
+
+    try {
+      final fetched = await carrerasService.fetchCarreras();
+      print('fetchCarreras returned: $fetched');
+      if (!mounted) return;
+      setState(() {
+        carreras = fetched ?? [];
+        loadingCarreras = false;
+      });
+    } catch (e, st) {
+      print('Error loading carreras: $e\n$st');
+      if (!mounted) return;
+      setState(() {
+        carreras = [];
+        loadingCarreras = false;
+        carrerasError = e.toString();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error cargando carreras: ${e.toString()}')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    //verificacion de que la contraseña sea la misma, es decir que se confirme
-    bool passwordMismatch = passCtrl.text != confirmCtrl.text;
+    final bool passwordMismatch = passCtrl.text != confirmCtrl.text;
 
     return Scaffold(
-      //pantalla completa scaffold
       appBar: AppBar(
-        //barra superior
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          //lo que va a la izquierda
-          icon: const Icon(Icons.arrow_back), //regresar al login
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go("/login"),
         ),
       ),
-
-      //para el body del scaffold usamos una singleScrollview para poder
-      //deslizar el contenido
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(26),
         child: Column(
@@ -68,7 +109,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               "Crear Cuenta",
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
-
             const SizedBox(height: 20),
 
             Center(
@@ -89,7 +129,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               controller: nameCtrl,
               decoration: const InputDecoration(labelText: "Nombre"),
             ),
-
             const SizedBox(height: 14),
 
             TextField(
@@ -97,11 +136,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
               decoration: const InputDecoration(labelText: "Apellido Paterno"),
             ),
             const SizedBox(height: 14),
+
             TextField(
               controller: apellidoMaternoCtrl,
               decoration: const InputDecoration(labelText: "Apellido Materno"),
             ),
             const SizedBox(height: 14),
+
             TextField(
               controller: emailCtrl,
               decoration: const InputDecoration(
@@ -115,11 +156,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
               controller: passCtrl,
               obscureText: true,
               decoration: const InputDecoration(labelText: "Contraseña"),
-              onChanged: (_) => setState(
-                () {},
-              ), //para reconstruir el UI en cada cambio de tecla
+              onChanged: (_) => setState(() {}),
             ),
-
             const SizedBox(height: 14),
 
             TextField(
@@ -135,11 +173,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
 
             const SizedBox(height: 20),
+
             const Text(
               "¿Cuál es tu rol?",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-
             const SizedBox(height: 8),
 
             Row(
@@ -155,7 +193,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           : Colors.black,
                     ),
                     onPressed: () {
-                      setState(() => selectedRole = 1);
+                      setState(() {
+                        selectedRole = 1;
+                      });
                     },
                     child: const Text("Estudiante"),
                   ),
@@ -172,7 +212,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           : Colors.black,
                     ),
                     onPressed: () {
-                      setState(() => selectedRole = 2);
+                      setState(() {
+                        selectedRole = 2;
+                        // if changes to organizer clear
+                        selectedInterests.clear();
+                        selectedCareer = null;
+                        selectedSemester = null;
+                      });
                     },
                     child: const Text("Organizador"),
                   ),
@@ -181,35 +227,96 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
 
             const SizedBox(height: 20),
-            const Text(
-              "Selecciona tus intereses",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
 
-            const SizedBox(height: 8),
-
-            Wrap(
-              spacing: 6,
-              children: intereses.map((i) {
-                final isSelected = selectedInterests.contains(i);
-
-                return FilterChip(
-                  label: Text(i),
-                  selected: isSelected,
-                  onSelected: (bool value) {
-                    setState(() {
-                      if (value) {
-                        selectedInterests.add(i);
-                      } else {
-                        selectedInterests.remove(i);
-                      }
-                    });
+            // fields estudiantes
+            if (selectedRole == 1) ...[
+              const Text(
+                "Carrera",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              if (loadingCarreras)
+                const Center(child: CircularProgressIndicator())
+              else if (carrerasError != null)
+                Text('Error cargando carreras: $carrerasError',
+                    style: TextStyle(color: Colors.red))
+              else
+                DropdownButtonFormField<int>(
+                  value: selectedCareer,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: "Selecciona tu carrera",
+                  ),
+                  items: carreras
+                      .map((c) {
+                        final int? id = c.idCarrera; // or c.id
+                        final String label = c.carrera;
+                        if (id == null) return null; 
+                        return DropdownMenuItem<int>(
+                          value: id,
+                          child: Text(label),
+                        );
+                      })
+                      .whereType<DropdownMenuItem<int>>() 
+                      .toList(),
+                  onChanged: (value) {
+                    setState(() => selectedCareer = value);
                   },
-                );
-              }).toList(),
-            ),
+                ),
 
-            const SizedBox(height: 30),
+              const SizedBox(height: 16),
+
+              const Text(
+                "Semestre",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              DropdownButtonFormField<int>(
+                value: selectedSemester,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: "Selecciona tu semestre",
+                ),
+                items: List.generate(10, (index) => index + 1)
+                    .map(
+                      (s) => DropdownMenuItem<int>(value: s, child: Text("$s")),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  setState(() => selectedSemester = value);
+                },
+              ),
+
+              const SizedBox(height: 20),
+
+              const Text(
+                "Selecciona tus intereses",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+
+              Wrap(
+                spacing: 6,
+                children: intereses.map((i) {
+                  final isSelected = selectedInterests.contains(i);
+                  return FilterChip(
+                    label: Text(i),
+                    selected: isSelected,
+                    onSelected: (bool value) {
+                      setState(() {
+                        if (value) {
+                          selectedInterests.add(i);
+                        } else {
+                          selectedInterests.remove(i);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+
+              const SizedBox(height: 30),
+            ],
 
             SizedBox(
               width: double.infinity,
@@ -233,17 +340,51 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     return;
                   }
 
-                  final auth = AuthService(); //mandamos llamar al servicio
+                  // validaciones extra si es estudiante
+                  if (selectedRole == 1) {
+                    if (selectedCareer == null || selectedSemester == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            "Selecciona tu carrera y semestre, por favor.",
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+                  }
 
-                  final error = await authService.registerUser(
+                  final interesesUsuario = selectedRole == 1
+                      ? selectedInterests
+                      : <String>[];
+
+                  // modelo Usuario
+                  final nuevoUsuario = Usuario(
+                    idUsuario: "",
                     nombre: nameCtrl.text.trim(),
                     apellidoPaterno: apellidoPaternoCtrl.text.trim(),
                     apellidoMaterno: apellidoMaternoCtrl.text.trim(),
                     email: emailCtrl.text.trim(),
+                    rol: selectedRole,
+                    foto: null,
+                  );
+
+                  // modelo estudiante (solo si aplica)
+                  StudentModel? studentModel;
+                  if (selectedRole == 1) {
+                    studentModel = StudentModel(
+                      idUsuario: "",
+                      carreraFK: selectedCareer!,
+                      semestre: selectedSemester!,
+                      intereses: interesesUsuario,
+                    );
+                  }
+
+                  final error = await authService.registerUser(
+                    usuario: nuevoUsuario,
                     password: passCtrl.text.trim(),
-                    rol: selectedRole, // id rol en tabla roles
-                    intereses: selectedRole == 1 ? selectedInterests : [],
-                    fotoFile: selectedImage, // se sube al bucket 
+                    fotoFile: selectedImage,
+                    estudiante: studentModel,
                   );
 
                   if (error != null) {
@@ -253,15 +394,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     return;
                   }
 
-                  // Si todo salió bien
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text("Registro exitoso")),
                   );
 
-                  // Redirigir al login
                   context.go('/login');
                 },
-
                 child: const Text(
                   "Registrarse",
                   style: TextStyle(fontSize: 18),
