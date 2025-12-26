@@ -1,30 +1,42 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'router/app_router.dart';
-import 'dart:io';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  /// cargando variables de entorno
-  await dotenv.load(fileName: ".env");
+  // Cargar variables de entorno desde .env
+  await dotenv.load(fileName: '.env');
 
-  /// inicializacion de supabase a traves de la variable de entorno
-  await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL']!,
-    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
-  );
+  final supabaseUrl = dotenv.env['SUPABASE_URL'];
+  final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'];
 
-  /// forzando http en android en caso de ser necesario
+  if (supabaseUrl == null || supabaseAnonKey == null) {
+    throw FlutterError(
+      'Faltan variables de entorno SUPABASE_URL y/o SUPABASE_ANON_KEY. Revisa tu archivo .env.',
+    );
+  }
+
+  try {
+    await Supabase.initialize(
+      url: supabaseUrl,
+      anonKey: supabaseAnonKey,
+    );
+  } catch (e, st) {
+    // Loguear y fallar temprano para facilitar el debugging
+    // ignore: avoid_print
+    print('Error inicializando Supabase: $e\n$st');
+    rethrow;
+  }
+
+  // Forzar HTTP (evitar errores SSL en desarrollo Android)
   HttpOverrides.global = MyHttpOverrides();
 
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -37,14 +49,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
-        fontFamily: "Roboto",
+        fontFamily: 'Roboto',
       ),
       routerConfig: appRouter,
     );
   }
 }
 
-/// evitar errores SSL
+/// Evitar errores SSL en desarrollo (no usar en producción)
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
