@@ -21,11 +21,24 @@ class _PerfilAdminScreenState extends State<PerfilAdminScreen> {
   Future<Map<String, dynamic>?> _fetchPerfil() async {
     final user = _supabase.auth.currentUser;
     if (user == null) return null;
+
     final res = await _supabase
         .from('usuario')
-        .select('id_usuario, nombre, ap_paterno, ap_materno, email, rol, foto')
+        .select(
+          '''
+          id_usuario,
+          nombre,
+          ap_paterno,
+          ap_materno,
+          email,
+          foto,
+          rolfk,
+          rolesusuario(nombrerol)
+          ''',
+        )
         .eq('id_usuario', user.id)
         .maybeSingle();
+
     if (res == null) return null;
     return Map<String, dynamic>.from(res);
   }
@@ -61,20 +74,25 @@ class _PerfilAdminScreenState extends State<PerfilAdminScreen> {
               return ListView(
                 children: const [
                   SizedBox(height: 120),
-                  Center(child: Text('No se encontró perfil.')),
+                  Center(child: Text('No se encontro perfil.')),
                 ],
               );
             }
 
-            final nombre = perfil['nombre'] ?? '';
-            final apPat = perfil['ap_paterno'] ?? '';
-            final apMat = perfil['ap_materno'] ?? '';
+            final nombre = (perfil['nombre'] ?? '').toString();
+            final apPat = (perfil['ap_paterno'] ?? '').toString();
+            final apMat = (perfil['ap_materno'] ?? '').toString();
             final fullName = [nombre, apPat, apMat]
-                .where((x) => (x as String).trim().isNotEmpty)
+                .where((x) => x.trim().isNotEmpty)
                 .join(' ');
-            final correo = perfil['email'] ?? '—';
-            final rol = perfil['rol'] ?? '—';
+
+            final correo = (perfil['email'] ?? '').toString();
             final foto = (perfil['foto'] ?? '').toString().trim();
+            final rolNombre = (perfil['rolesusuario']?['nombrerol'] ?? '').toString();
+            final rolId = perfil['rolfk'];
+            final rolDisplay = rolNombre.isNotEmpty
+                ? rolNombre
+                : (rolId == null ? 'Sin rol' : 'Rol #$rolId');
 
             return ListView(
               padding: const EdgeInsets.all(20),
@@ -96,7 +114,7 @@ class _PerfilAdminScreenState extends State<PerfilAdminScreen> {
                 const SizedBox(height: 6),
                 Center(
                   child: Text(
-                    rol,
+                    rolDisplay,
                     style: const TextStyle(color: Colors.grey),
                   ),
                 ),
@@ -106,7 +124,7 @@ class _PerfilAdminScreenState extends State<PerfilAdminScreen> {
                   child: ListTile(
                     leading: const Icon(Icons.email_outlined),
                     title: const Text('Correo'),
-                    subtitle: Text(correo),
+                    subtitle: Text(correo.isEmpty ? 'Sin correo' : correo),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -115,13 +133,13 @@ class _PerfilAdminScreenState extends State<PerfilAdminScreen> {
                   child: ListTile(
                     leading: const Icon(Icons.badge_outlined),
                     title: const Text('Rol'),
-                    subtitle: Text(rol),
+                    subtitle: Text(rolDisplay),
                   ),
                 ),
                 const SizedBox(height: 20),
                 FilledButton.icon(
                   onPressed: () {
-                    // aquí podrías navegar a una pantalla de edición de perfil
+                    // Navegar a edicion de perfil.
                   },
                   icon: const Icon(Icons.edit),
                   label: const Text('Editar perfil'),
@@ -131,11 +149,11 @@ class _PerfilAdminScreenState extends State<PerfilAdminScreen> {
                   onPressed: () async {
                     await _supabase.auth.signOut();
                     if (mounted) {
-                      // aquí podrías redirigir a login si usas GoRouter/Navigator
+                      // Redirigir a login si usas GoRouter/Navigator.
                     }
                   },
                   icon: const Icon(Icons.logout),
-                  label: const Text('Cerrar sesión'),
+                  label: const Text('Cerrar sesion'),
                 ),
               ],
             );

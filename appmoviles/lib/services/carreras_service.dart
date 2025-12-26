@@ -8,7 +8,7 @@ class CarrerasService {
   CarrerasService({SupabaseClient? client})
       : supabase = client ?? Supabase.instance.client;
 
-  /// Obtener todas las carreras (retorna lista vacía si no hay datos)
+  /// Obtener todas las carreras (retorna lista vacia si no hay datos).
   Future<List<CarreraModel>> fetchCarreras() async {
     try {
       final resp = await supabase.from('carrera').select().order('carrera');
@@ -27,7 +27,7 @@ class CarrerasService {
     }
   }
 
-  /// Obtener una carrera por id (retorna null si no existe)
+  /// Obtener una carrera por id (retorna null si no existe).
   Future<CarreraModel?> fetchCarreraById(String id) async {
     try {
       final resp = await supabase
@@ -47,7 +47,7 @@ class CarrerasService {
     }
   }
 
-  /// Crear una nueva carrera. Retorna null si éxito, o mensaje de error.
+  /// Crear una nueva carrera. Retorna null si exito, o mensaje de error.
   Future<String?> createCarrera(CarreraModel carrera) async {
     try {
       final resp = await supabase.from('carrera').insert(carrera.toMap()).select();

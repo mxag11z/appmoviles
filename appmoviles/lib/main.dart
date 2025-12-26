@@ -9,7 +9,6 @@ import 'router/app_router.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Cargar variables de entorno desde .env
   await dotenv.load(fileName: '.env');
 
   final supabaseUrl = dotenv.env['SUPABASE_URL'];
@@ -27,13 +26,12 @@ Future<void> main() async {
       anonKey: supabaseAnonKey,
     );
   } catch (e, st) {
-    // Loguear y fallar temprano para facilitar el debugging
     // ignore: avoid_print
     print('Error inicializando Supabase: $e\n$st');
     rethrow;
   }
 
-  // Forzar HTTP (evitar errores SSL en desarrollo Android)
+  // Forzar HTTP (evitar errores SSL en desarrollo Android).
   HttpOverrides.global = MyHttpOverrides();
 
   runApp(const ProviderScope(child: MyApp()));
@@ -56,7 +54,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
-/// Evitar errores SSL en desarrollo (no usar en producción)
+/// Evitar errores SSL en desarrollo (no usar en produccion).
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
