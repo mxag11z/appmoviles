@@ -113,4 +113,49 @@ class AuthService {
       return e.toString();
     }
   }
+
+  /// Enviar correo de recuperación de contraseña
+  Future<String?> sendPasswordResetEmail(String email) async {
+    try {
+      await supabase.auth.resetPasswordForEmail(email);
+      return null; // éxito
+    } on AuthException catch (e) {
+      return e.message;
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  /// Verificar el token y actualizar la contraseña
+  Future<String?> resetPasswordWithToken({
+    required String email,
+    required String token,
+    required String newPassword,
+  }) async {
+    try {
+      final verifyRes = await supabase.auth.verifyOTP(
+        type: OtpType.recovery,
+        email: email,
+        token: token,
+      );
+
+      if (verifyRes.user == null) {
+        return "Token inválido o expirado.";
+      }
+
+      final updateRes = await supabase.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
+
+      if (updateRes.user == null) {
+        return "No se pudo actualizar la contraseña.";
+      }
+
+      return null; // éxito
+    } on AuthException catch (e) {
+      return e.message;
+    } catch (e) {
+      return e.toString();
+    }
+  }
 }
