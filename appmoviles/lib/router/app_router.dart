@@ -3,8 +3,9 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/screens/onboarding.dart';
 import '../features/auth/screens/login.dart';
 import '../features/auth/screens/register.dart';
+import '../features/auth/screens/forgot_password.dart';
+import '../features/auth/screens/reset_password_token.dart';
 
-/// Screens placeholders de prueba
 class PlaceholderScreen extends StatelessWidget {
   final String text;
   const PlaceholderScreen(this.text, {super.key});
@@ -22,9 +23,6 @@ class PlaceholderScreen extends StatelessWidget {
   }
 }
 
-
-
-/// definicion del router global
 final GoRouter appRouter = GoRouter(
   initialLocation: "/onboarding",
   routes: [
@@ -40,6 +38,19 @@ final GoRouter appRouter = GoRouter(
       path: "/register",
       builder: (_, _) => const RegisterScreen(),
     ),
+
+    GoRoute(
+      path: "/forgot-password",
+      builder: (_, __) => const ForgotPasswordScreen(),
+    ),
+    GoRoute(
+      path: "/reset-password-form",
+      builder: (context, state) {
+        final email = state.uri.queryParameters['email'] ?? '';
+        return ResetPasswordWithTokenScreen(email: email);
+      },
+    ),
+
     GoRoute(
       path: "/estudiante/home",
       builder: (context, state) =>
@@ -56,3 +67,4 @@ final GoRouter appRouter = GoRouter(
     ),
   ],
 );
+

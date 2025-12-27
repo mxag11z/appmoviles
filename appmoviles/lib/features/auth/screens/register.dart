@@ -97,7 +97,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go("/login"),
+          onPressed: () => context.pop(),
         ),
       ),
       body: SingleChildScrollView(
