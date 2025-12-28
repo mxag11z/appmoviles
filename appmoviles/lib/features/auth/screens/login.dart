@@ -12,6 +12,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
   String? error;
+  bool isLoading = false;
 
   final ipnRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@alumno\.ipn\.mx$');
 
@@ -89,23 +90,62 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed: () {
-                  final email = emailCtrl.text.trim();
-                  if (!ipnRegex.hasMatch(email)) {
-                    setState(() => error = "El correo debe ser @alumno.ipn.mx");
-                    return;
-                  }
-
-                  setState(() => error = null);
-
-                  // TODO: login con Supabase
-                },
-                child: const Text("Iniciar Sesión", style: TextStyle(fontSize: 18)),
+                onPressed: isLoading ? null : _handleLogin,
+                child: isLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Text("Iniciar Sesión", style: TextStyle(fontSize: 18)),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _handleLogin() async {
+    final email = emailCtrl.text.trim();
+    final password = passCtrl.text.trim();
+
+    if (!ipnRegex.hasMatch(email)) {
+      setState(() => error = "El correo debe ser @alumno.ipn.mx");
+      return;
+    }
+
+    if (password.isEmpty) {
+      setState(() => error = "La contraseña no puede estar vacía");
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+      error = null;
+    });
+
+    try {
+      // TODO: Implementar login con Supabase y obtener el rol del usuario
+      // Por ahora, navega a admin como placeholder
+      if (mounted) {
+        context.go("/admin/home");
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => error = "Error: $e");
+      }
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    emailCtrl.dispose();
+    passCtrl.dispose();
+    super.dispose();
   }
 }

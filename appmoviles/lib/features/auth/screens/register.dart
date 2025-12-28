@@ -30,7 +30,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final userService = UserService();
   final authService = AuthService();
 
-  int selectedRole = 1; // 1, estudiante, 2, organizador
+  int selectedRole = 1; // 1, estudiante, 2, organizador, 3, administrador
   List<String> selectedInterests = [];
 
   final ipnRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@alumno\.ipn\.mx$');
@@ -180,47 +180,75 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             const SizedBox(height: 8),
 
-            Row(
+            Column(
               children: [
-                Expanded(
-                  child: FilledButton(
-                    style: FilledButton.styleFrom(
-                      backgroundColor: selectedRole == 1
-                          ? Colors.blue
-                          : Colors.grey.shade200,
-                      foregroundColor: selectedRole == 1
-                          ? Colors.white
-                          : Colors.black,
+                Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: selectedRole == 1
+                              ? Colors.blue
+                              : Colors.grey.shade200,
+                          foregroundColor: selectedRole == 1
+                              ? Colors.white
+                              : Colors.black,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            selectedRole = 1;
+                          });
+                        },
+                        child: const Text("Estudiante"),
+                      ),
                     ),
-                    onPressed: () {
-                      setState(() {
-                        selectedRole = 1;
-                      });
-                    },
-                    child: const Text("Estudiante"),
-                  ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: FilledButton(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: selectedRole == 2
+                              ? Colors.blue
+                              : Colors.grey.shade200,
+                          foregroundColor: selectedRole == 2
+                              ? Colors.white
+                              : Colors.black,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            selectedRole = 2;
+                            // if changes to organizer clear
+                            selectedInterests.clear();
+                            selectedCareer = null;
+                            selectedSemester = null;
+                          });
+                        },
+                        child: const Text("Organizador"),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Expanded(
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
                   child: FilledButton(
                     style: FilledButton.styleFrom(
-                      backgroundColor: selectedRole == 2
+                      backgroundColor: selectedRole == 3
                           ? Colors.blue
                           : Colors.grey.shade200,
-                      foregroundColor: selectedRole == 2
+                      foregroundColor: selectedRole == 3
                           ? Colors.white
                           : Colors.black,
                     ),
                     onPressed: () {
                       setState(() {
-                        selectedRole = 2;
-                        // if changes to organizer clear
+                        selectedRole = 3;
+                        // if changes to admin clear
                         selectedInterests.clear();
                         selectedCareer = null;
                         selectedSemester = null;
                       });
                     },
-                    child: const Text("Organizador"),
+                    child: const Text("Administrador"),
                   ),
                 ),
               ],
@@ -421,3 +449,4 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 }
+

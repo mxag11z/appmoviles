@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/screens/onboarding.dart';
 import '../features/auth/screens/login.dart';
 import '../features/auth/screens/register.dart';
+import '../features/auth/screens/admin_shell.dart';
 
 /// Screens placeholders de prueba
 class PlaceholderScreen extends StatelessWidget {
@@ -22,8 +23,6 @@ class PlaceholderScreen extends StatelessWidget {
   }
 }
 
-
-
 /// definicion del router global
 final GoRouter appRouter = GoRouter(
   initialLocation: "/onboarding",
@@ -38,21 +37,19 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: "/register",
-      builder: (_, _) => const RegisterScreen(),
+      builder: (_, __) => const RegisterScreen(),
     ),
     GoRoute(
       path: "/estudiante/home",
-      builder: (context, state) =>
-          const PlaceholderScreen("Home Estudiante"),
+      builder: (context, state) => const PlaceholderScreen("Home Estudiante"),
     ),
     GoRoute(
       path: "/organizador/home",
-      builder: (context, state) =>
-          const PlaceholderScreen("Home Organizador"),
+      builder: (context, state) => const PlaceholderScreen("Home Organizador"),
     ),
     GoRoute(
       path: "/admin/home",
-      builder: (context, state) => const PlaceholderScreen("Home Admin"),
+      builder: (context, state) => const AdminShell(),
     ),
   ],
 );
