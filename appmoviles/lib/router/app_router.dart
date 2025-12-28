@@ -3,6 +3,12 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/screens/onboarding.dart';
 import '../features/auth/screens/login.dart';
 import '../features/auth/screens/register.dart';
+import '../features/organizer_organizador.dart';
+import '../features/register_event_organizador.dart';
+import '../features/mis_eventos_screen_organizador.dart';
+import '../features/eventos_aprobados_organizador.dart';
+import '../features/todos_eventos_usuarioGeneral.dart';
+import '../features/asistentes_evento_organizador.dart';
 
 /// Screens placeholders de prueba
 class PlaceholderScreen extends StatelessWidget {
@@ -47,12 +53,35 @@ final GoRouter appRouter = GoRouter(
     ),
     GoRoute(
       path: "/organizador/home",
-      builder: (context, state) =>
-          const PlaceholderScreen("Home Organizador"),
+      builder: (context, state) => const OrganizerHomeScreen(),
     ),
     GoRoute(
       path: "/admin/home",
       builder: (context, state) => const PlaceholderScreen("Home Admin"),
     ),
+    GoRoute(
+      path: "/organizador/registrar_evento",
+      builder: (context, state) => const RegisterEventScreen(), 
+    ),
+    GoRoute(
+      path: "/organizador/mis_eventos",
+      builder: (context, state) => const MisEventosScreen(),
+    ),
+    GoRoute(
+      path: "/organizador/eventos-aprobados",
+      builder: (context, state) => const EventosAprobadosScreen(),
+    ),
+    GoRoute(
+      path: "/all-eventos",
+      builder: (context, state) => const AllEventosScreen(),
+    ),
+    GoRoute(
+      path: '/organizador/evento/:eventoId/invitados',
+      builder: (context, state) {
+        final eventoId = state.pathParameters['eventoId']!;
+        return AsistentesEventosScreen(eventoId: eventoId);
+      },
+    ),
+
   ],
 );
