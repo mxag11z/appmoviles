@@ -17,12 +17,16 @@ class EventService {
 
   Future<List<Evento>> getEventos({String estado = 'pendiente'}) async {
     try {
-      final statusId = _statusIds[estado] ?? _statusIds['pendiente']!;
+      // Primero traer TODOS los eventos sin filtro para debug
       final res = await supabase
           .from('evento')
           .select()
-          .eq('status_fk', statusId)
           .order('fechainicio', ascending: true);
+
+      print('DEBUG: Eventos recibidos: ${res.length}');
+      if (res.isNotEmpty) {
+        print('DEBUG: Primer evento: ${res[0]}');
+      }
 
       final data = res as List<dynamic>;
       return data

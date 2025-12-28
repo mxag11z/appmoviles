@@ -23,7 +23,6 @@ class _EventosAdminScreenState extends State<EventosAdminScreen> {
     setState(() {
       _eventosFuture = _eventService.getEventos();
     });
-    await _eventosFuture;
   }
 
   String _chipLabel(String categoria) {
@@ -51,11 +50,20 @@ class _EventosAdminScreenState extends State<EventosAdminScreen> {
   }
 
   String _formatFechaHora(Evento e) {
-    // Ajusta si tu backend manda otra cosa; aquí asumo DateTime ya parseado.
     final d = e.fechaInicio;
     final meses = [
-      'Enero','Febrero','Marzo','Abril','Mayo','Junio',
-      'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre'
     ];
     final hora = (d.hour % 12 == 0) ? 12 : d.hour % 12;
     final ampm = d.hour >= 12 ? 'PM' : 'AM';
@@ -66,22 +74,12 @@ class _EventosAdminScreenState extends State<EventosAdminScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7FB),
+      backgroundColor: const Color(0xFFF3F5FA),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        title: const Text('Validación de eventos'),
         elevation: 0,
-        title: const Text(
-          'Eventos',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.black87),
-            onPressed: () {
-              // luego lo conectas a filtro/búsqueda
-            },
-          ),
-        ],
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
       ),
       body: FutureBuilder<List<Evento>>(
         future: _eventosFuture,
@@ -124,7 +122,6 @@ class _EventosAdminScreenState extends State<EventosAdminScreen> {
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, i) {
                 final e = eventos[i];
-
                 return Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -143,7 +140,6 @@ class _EventosAdminScreenState extends State<EventosAdminScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Chip categoría
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
@@ -159,13 +155,10 @@ class _EventosAdminScreenState extends State<EventosAdminScreen> {
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 10),
-
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Texto
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,16 +192,13 @@ class _EventosAdminScreenState extends State<EventosAdminScreen> {
                                 ],
                               ),
                             ),
-
                             const SizedBox(width: 12),
-
-                            // Imagen derecha (placeholder si no hay URL)
                             ClipRRect(
                               borderRadius: BorderRadius.circular(12),
                               child: SizedBox(
                                 width: 84,
                                 height: 84,
-                                child: (e.foto.isNotEmpty && (e.foto.startsWith('http')))
+                                child: (e.foto.isNotEmpty && e.foto.startsWith('http'))
                                     ? Image.network(e.foto, fit: BoxFit.cover)
                                     : Container(
                                         color: const Color(0xFFEDEFF5),
@@ -218,15 +208,13 @@ class _EventosAdminScreenState extends State<EventosAdminScreen> {
                             ),
                           ],
                         ),
-
                         const SizedBox(height: 12),
-
                         Row(
                           children: [
                             Expanded(
                               child: OutlinedButton(
                                 onPressed: () {
-                                  // TODO: rechazar evento (update en supabase)
+                                  // TODO: rechazar evento
                                 },
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: Colors.black87,
@@ -243,7 +231,7 @@ class _EventosAdminScreenState extends State<EventosAdminScreen> {
                             Expanded(
                               child: ElevatedButton(
                                 onPressed: () {
-                                  // TODO: aprobar evento (update en supabase)
+                                  // TODO: aprobar evento
                                 },
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF2F6FED),

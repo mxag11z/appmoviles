@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class UsuariosAdminScreen extends StatefulWidget {
-  const UsuariosAdminScreen({super.key});
+class NotificacionesAdminScreen extends StatefulWidget {
+  const NotificacionesAdminScreen({super.key});
 
   @override
-  State<UsuariosAdminScreen> createState() => _UsuariosAdminScreenState();
+  State<NotificacionesAdminScreen> createState() => _NotificacionesAdminScreenState();
 }
 
-class _UsuariosAdminScreenState extends State<UsuariosAdminScreen> {
+class _NotificacionesAdminScreenState extends State<NotificacionesAdminScreen> {
   final _supabase = Supabase.instance.client;
   late Future<List<Map<String, dynamic>>> _usersFuture;
 
@@ -19,11 +19,15 @@ class _UsuariosAdminScreenState extends State<UsuariosAdminScreen> {
   }
 
   Future<List<Map<String, dynamic>>> _fetchUsers() async {
-    final res = await _supabase
-        .from('usuario')
-        .select('id_usuario, nombre, ap_paterno, ap_materno, email, rol, foto')
-        .order('nombre');
-    return List<Map<String, dynamic>>.from(res);
+    final selectStr = 'id_usuario, nombre, ap_paterno, ap_materno, email, rolfk, foto';
+    try {
+      debugPrint('Executing select on usuario: $selectStr');
+      final res = await _supabase.from('usuario').select(selectStr).order('nombre');
+      return List<Map<String, dynamic>>.from(res);
+    } catch (e, st) {
+      debugPrint('Error in _fetchUsers (notificaciones): $e\n$st');
+      rethrow;
+    }
   }
 
   Future<void> _refresh() async {
@@ -71,7 +75,7 @@ class _UsuariosAdminScreenState extends State<UsuariosAdminScreen> {
                 final apPat = u['ap_paterno'] ?? '';
                 final apMat = u['ap_materno'] ?? '';
                 final fullName = [nombre, apPat, apMat].where((x) => (x as String).trim().isNotEmpty).join(' ');
-                final rol = u['rol'] ?? '—';
+                final rol = (u['rol'] ?? u['rolfk'] ?? '—').toString();
                 final correo = u['email'] ?? '—';
                 final foto = (u['foto'] ?? '').toString().trim();
 

@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import '../services/event_service.dart';
 import '../data/models/evento_model.dart';
 
-class EventosScreen extends StatefulWidget {
-  const EventosScreen({super.key});
+class EventosContent extends StatefulWidget {
+  const EventosContent({super.key});
 
   @override
-  State<EventosScreen> createState() => _EventosScreenState();
+  State<EventosContent> createState() => _EventosContentState();
 }
 
-class _EventosScreenState extends State<EventosScreen> {
+class _EventosContentState extends State<EventosContent> {
   final EventService _eventService = EventService();
   late Future<List<Evento>> _eventosFuture;
 
@@ -25,7 +25,6 @@ class _EventosScreenState extends State<EventosScreen> {
     });
   }
 
-  // Chip por categoría
   Color _chipBg(String categoria) {
     switch (categoria.toLowerCase()) {
       case 'académico':
@@ -56,7 +55,6 @@ class _EventosScreenState extends State<EventosScreen> {
 
   String _fechaHora(Evento e) {
     final f = e.fechaInicio;
-    // formato simple (puedes mejorarlo con intl)
     final day = f.day.toString().padLeft(2, '0');
     final month = f.month.toString().padLeft(2, '0');
     final year = f.year;
@@ -64,6 +62,73 @@ class _EventosScreenState extends State<EventosScreen> {
     final min = f.minute.toString().padLeft(2, '0');
     return '$day/$month/$year, $hour:$min';
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: _refresh,
+      child: FutureBuilder<List<Evento>>(
+        future: _eventosFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return ListView(
+              children: [
+                const SizedBox(height: 120),
+                Center(
+                  child: Text(
+                    'Error cargando eventos:\n${snapshot.error}',
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            );
+          }
+
+          final eventos = snapshot.data ?? [];
+          if (eventos.isEmpty) {
+            return ListView(
+              children: const [
+                SizedBox(height: 120),
+                Center(child: Text('No hay eventos para validar.')),
+              ],
+            );
+          }
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: eventos.length,
+            itemBuilder: (context, index) {
+              final e = eventos[index];
+              return _EventoCard(
+                evento: e,
+                chipBg: _chipBg(e.categoria),
+                chipFg: _chipFg(e.categoria),
+                fechaHora: _fechaHora(e),
+                onAprobar: () async {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Aprobar (pendiente de conectar update)')),
+                  );
+                },
+                onRechazar: () async {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Rechazar (pendiente de conectar update)')),
+                  );
+                },
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class EventosScreen extends StatelessWidget {
+  const EventosScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -77,108 +142,13 @@ class _EventosScreenState extends State<EventosScreen> {
         centerTitle: true,
         actions: [
           IconButton(
-            onPressed: () {
-              // aquí podrías abrir búsqueda/filtro
-            },
+            onPressed: () {},
             icon: const Icon(Icons.search),
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: _refresh,
-        child: FutureBuilder<List<Evento>>(
-          future: _eventosFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (snapshot.hasError) {
-              return ListView(
-                children: [
-                  const SizedBox(height: 120),
-                  Center(
-                    child: Text(
-                      'Error cargando eventos:\n${snapshot.error}',
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
-              );
-            }
-
-            final eventos = snapshot.data ?? [];
-            if (eventos.isEmpty) {
-              return ListView(
-                children: const [
-                  SizedBox(height: 120),
-                  Center(child: Text('No hay eventos para validar.')),
-                ],
-              );
-            }
-
-            return ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: eventos.length,
-              itemBuilder: (context, index) {
-                final e = eventos[index];
-                return _EventoCard(
-                  evento: e,
-                  chipBg: _chipBg(e.categoria),
-                  chipFg: _chipFg(e.categoria),
-                  fechaHora: _fechaHora(e),
-                  onAprobar: () async {
-                    // TODO: aquí normalmente harías un update en Supabase:
-                    // supabase.from('evento').update({'estado': 'aprobado'}).eq('id_evento', e.idEvento);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Aprobar (pendiente de conectar update)')),
-                    );
-                  },
-                  onRechazar: () async {
-                    // TODO: update estado = rechazado
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Rechazar (pendiente de conectar update)')),
-                    );
-                  },
-                );
-              },
-            );
-          },
-        ),
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: 0,
-        onDestinationSelected: (i) {
-          // aquí conectas tus pantallas
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.verified_outlined),
-            selectedIcon: Icon(Icons.verified),
-            label: 'Validar',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.event_outlined),
-            selectedIcon: Icon(Icons.event),
-            label: 'Eventos',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.people_alt_outlined),
-            selectedIcon: Icon(Icons.people_alt),
-            label: 'Usuarios',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.notifications_none),
-            selectedIcon: Icon(Icons.notifications),
-            label: 'Notificaciones',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Perfil',
-          ),
-        ],
-      ),
+      body: const EventosContent(),
+      // keep navigation bar here for standalone usage; AdminShell will provide its own
     );
   }
 }
@@ -265,7 +235,7 @@ class _EventoCard extends StatelessWidget {
 
                 Text(
                   evento.descripcion,
-                  maxLines: 3,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(color: Color(0xFF6B7280)),
                 ),
@@ -277,7 +247,8 @@ class _EventoCard extends StatelessWidget {
                       onPressed: onRechazar,
                       style: OutlinedButton.styleFrom(
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                        side: const BorderSide(color: Color(0xFFCBD5E1)),
                       ),
                       child: const Text('Rechazar'),
                     ),
@@ -285,8 +256,9 @@ class _EventoCard extends StatelessWidget {
                     ElevatedButton(
                       onPressed: onAprobar,
                       style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1E60A8),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       ),
                       child: const Text('Aprobar'),
                     ),
@@ -302,8 +274,8 @@ class _EventoCard extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(14),
             child: SizedBox(
-              width: 86,
-              height: 86,
+              width: 72,
+              height: 72,
               child: _EventoImage(url: evento.foto),
             ),
           ),
