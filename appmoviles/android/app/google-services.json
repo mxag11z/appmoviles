@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "916242475656",
+    "project_id": "appmoviles-e42f5",
+    "storage_bucket": "appmoviles-e42f5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:916242475656:android:3d2c8aba977edff00e0d3d",
+        "android_client_info": {
+          "package_name": "com.example.appmovile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6UHQPrprHckv2N5DvHp9vUoJ1xz_tQe4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:916242475656:android:cbf30456a61aff3e0e0d3d",
+        "android_client_info": {
+          "package_name": "com.example.appmoviles"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD6UHQPrprHckv2N5DvHp9vUoJ1xz_tQe4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

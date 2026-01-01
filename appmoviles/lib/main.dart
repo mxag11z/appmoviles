@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'router/app_router.dart';
 import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -10,6 +11,9 @@ Future<void> main() async {
 
   /// cargando variables de entorno
   await dotenv.load(fileName: ".env");
+
+  /// inicializacion de Firebase
+  await Firebase.initializeApp();
 
   /// inicializacion de supabase a traves de la variable de entorno
   await Supabase.initialize(

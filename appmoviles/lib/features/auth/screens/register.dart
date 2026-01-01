@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:appmoviles/services/auth_service.dart';
 import 'package:appmoviles/services/storage_service.dart';
 import 'package:appmoviles/services/user_service.dart';
-import 'package:appmoviles/core/widgets/profile_image_picker.dart';
 import 'dart:io';
 import 'package:appmoviles/data/models/usuario_model.dart';
 import 'package:appmoviles/data/models/student_model.dart';
