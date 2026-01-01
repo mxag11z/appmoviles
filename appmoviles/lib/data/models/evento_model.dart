@@ -2,60 +2,54 @@ class Evento {
   final String idEvento;
   final String titulo;
   final String descripcion;
+  final String categoriaNombre;
   final DateTime fechaInicio;
   final DateTime fechaFin;
   final String ubicacion;
-  final int cupo;
-  final String organizadorFk;
-  final int categoriaFk;
-  final String foto;
-  final int estado;
+  final String organizadorFK;
+  final String status;
+  final String? foto;
+  final int? cupo;
 
   Evento({
     required this.idEvento,
     required this.titulo,
     required this.descripcion,
+    required this.categoriaNombre,
     required this.fechaInicio,
     required this.fechaFin,
     required this.ubicacion,
-    required this.cupo,
-    required this.organizadorFk,
-    required this.categoriaFk,
-    required this.foto,
-    required this.estado,
+    required this.organizadorFK,
+    required this.status,
+    this.foto,
+    this.cupo,
   });
 
   /// de base de datos a app
   factory Evento.fromMap(Map<String, dynamic> map) {
     return Evento(
-      idEvento: map['id_evento'],
-      titulo: map['titulo'],
-      descripcion: map['descripcion'],
-      fechaInicio: DateTime.parse(map['fechainicio']),
-      fechaFin: DateTime.parse(map['fechafin']),
-      ubicacion: map['ubicacion'],
-      cupo: map['cupo'],
-      organizadorFk: map['organizadorfk'],
-      categoriaFk: map['categoriafk'],
-      foto: map['foto'] ?? '',
-      estado: map['status_fk'],
+      idEvento: map['id_evento'] as String,
+      titulo: map['titulo'] as String,
+      descripcion: (map['descripcion'] ?? '') as String,
+      categoriaNombre: (map['categoria']?['nombre'] ?? 'Sin categoría') as String,
+      fechaInicio: _parseDate(map['fechainicio']),
+      fechaFin: _parseDate(map['fechafin']),
+      ubicacion: (map['ubicacion'] ?? '') as String,
+      organizadorFK: (map['organizadorfk'] ?? '') as String,
+      status: (map['evento_status']?['nombre'] ?? '') as String,
+      foto: map['foto'] as String?,
+      cupo: map['cupo'] as int?,
     );
   }
 
-  /// de app a base de datos
-  Map<String, dynamic> toMap() {
-    return {
-      'titulo': titulo,
-      'descripcion': descripcion,
-      'fechainicio': fechaInicio.toIso8601String(),
-      'fechafin': fechaFin.toIso8601String(),
-      'ubicacion': ubicacion,
-      'cupo': cupo,
-      'organizadorfk': organizadorFk,
-      'categoriafk': categoriaFk,
-      'foto': foto,
-      'status_fk': estado,
-    };
+  static DateTime _parseDate(dynamic value) {
+    if (value == null) return DateTime.now();
+    final str = value.toString();
+    // Si es solo fecha (YYYY-MM-DD), agregar hora por defecto
+    if (str.length == 10) {
+      return DateTime.parse('${str}T00:00:00');
+    }
+    return DateTime.parse(str);
   }
 
   

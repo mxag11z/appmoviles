@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:appmoviles/services/auth_service.dart';
 import 'package:appmoviles/services/storage_service.dart';
 import 'package:appmoviles/services/user_service.dart';
-import 'package:appmoviles/core/widgets/profile_image_picker.dart';
 import 'dart:io';
 import 'package:appmoviles/data/models/usuario_model.dart';
 import 'package:appmoviles/data/models/student_model.dart';
@@ -51,7 +50,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final carrerasService = CarrerasService();
   List<CarreraModel> carreras = [];
   bool loadingCarreras = true;
-  String? carrerasError; 
+  String? carrerasError;
 
   @override
   void initState() {
@@ -97,7 +96,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go("/login"),
+          onPressed: () => context.pop(),
         ),
       ),
       body: SingleChildScrollView(
@@ -109,20 +108,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
               "Crear Cuenta",
               style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 20),
-
-            Center(
-              child: ProfileImagePicker(
-                imageFile: selectedImage,
-                onPickImage: () async {
-                  final img = await storageService.pickImage();
-                  if (img != null) {
-                    setState(() => selectedImage = img);
-                  }
-                },
-              ),
-            ),
-
             const SizedBox(height: 20),
 
             TextField(
@@ -238,8 +223,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
               if (loadingCarreras)
                 const Center(child: CircularProgressIndicator())
               else if (carrerasError != null)
-                Text('Error cargando carreras: $carrerasError',
-                    style: TextStyle(color: Colors.red))
+                Text(
+                  'Error cargando carreras: $carrerasError',
+                  style: TextStyle(color: Colors.red),
+                )
               else
                 DropdownButtonFormField<int>(
                   value: selectedCareer,
@@ -251,13 +238,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       .map((c) {
                         final int? id = c.idCarrera; // or c.id
                         final String label = c.carrera;
-                        if (id == null) return null; 
+                        if (id == null) return null;
                         return DropdownMenuItem<int>(
                           value: id,
                           child: Text(label),
                         );
                       })
-                      .whereType<DropdownMenuItem<int>>() 
+                      .whereType<DropdownMenuItem<int>>()
                       .toList(),
                   onChanged: (value) {
                     setState(() => selectedCareer = value);
@@ -395,7 +382,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   }
 
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Registro exitoso")),
+                    const SnackBar(
+                      content: Text(
+                        "Registro exitoso. Te enviamos un correo para confirmar tu cuenta.",
+                      ),
+                      duration: Duration(seconds: 4),
+                    ),
                   );
 
                   context.go('/login');

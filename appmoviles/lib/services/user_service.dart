@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:appmoviles/data/models/usuario_model.dart';
 
 class UserService {
   final supabase = Supabase.instance.client;
@@ -12,4 +13,20 @@ class UserService {
         .update({"foto": url})
         .eq("id_usuario", userId); 
   }
+
+  Future<Usuario?> getCurrentUsuario() async {
+    final user = supabase.auth.currentUser;
+    if (user == null) return null;
+
+    final response = await supabase
+        .from('usuario')
+        .select('*')
+        .eq('id_usuario', user.id)
+        .maybeSingle();
+
+    if (response == null) return null;
+
+    return Usuario.fromMap(response);
+  }
+
 }
