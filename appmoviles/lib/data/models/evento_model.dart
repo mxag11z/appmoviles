@@ -25,6 +25,7 @@ class Evento {
     this.cupo,
   });
 
+  /// de base de datos a app
   factory Evento.fromMap(Map<String, dynamic> map) {
     return Evento(
       idEvento: map['id_evento'] as String,
@@ -49,5 +50,34 @@ class Evento {
       return DateTime.parse('${str}T00:00:00');
     }
     return DateTime.parse(str);
+  }
+
+  
+  Evento copyWith({
+    String? idEvento,
+    String? titulo,
+    String? descripcion,
+    DateTime? fechaInicio,
+    DateTime? fechaFin,
+    String? ubicacion,
+    int? cupo,
+    String? organizadorFk,
+    int? categoriaFk,
+    String? foto,
+    int? estado,
+  }) {
+    return Evento(
+      idEvento: idEvento ?? this.idEvento,
+      titulo: titulo ?? this.titulo,
+      descripcion: descripcion ?? this.descripcion,
+      fechaInicio: fechaInicio ?? this.fechaInicio,
+      fechaFin: fechaFin ?? this.fechaFin,
+      ubicacion: ubicacion ?? this.ubicacion,
+      cupo: cupo ?? this.cupo,
+      organizadorFk: organizadorFk ?? this.organizadorFk,
+      categoriaFk: categoriaFk ?? this.categoriaFk,
+      foto: foto ?? this.foto,
+      estado: estado ?? this.estado,
+    );
   }
 }
