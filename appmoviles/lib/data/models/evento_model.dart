@@ -2,54 +2,52 @@ class Evento {
   final String idEvento;
   final String titulo;
   final String descripcion;
-  final String categoria;
+  final String categoriaNombre;
   final DateTime fechaInicio;
   final DateTime fechaFin;
-  final String lugar;
+  final String ubicacion;
   final String organizadorFK;
-  final String estado;
-  final String foto; 
+  final String status;
+  final String? foto;
+  final int? cupo;
 
   Evento({
     required this.idEvento,
     required this.titulo,
     required this.descripcion,
-    required this.categoria,
+    required this.categoriaNombre,
     required this.fechaInicio,
     required this.fechaFin,
-    required this.lugar,
+    required this.ubicacion,
     required this.organizadorFK,
-    required this.estado,
-    required this.foto,
+    required this.status,
+    this.foto,
+    this.cupo,
   });
 
   factory Evento.fromMap(Map<String, dynamic> map) {
     return Evento(
-      idEvento: map['id_evento'],
-      titulo: map['titulo'],
-      descripcion: map['descripcion'],
-      categoria: map['categoria'],
-      fechaInicio: DateTime.parse(map['fecha_inicio']),
-      fechaFin: DateTime.parse(map['fecha_fin']),
-      lugar: map['lugar'],
-      organizadorFK: map['organizadorFK'],
-      estado: map['estado'],
-      foto: map['foto'],
+      idEvento: map['id_evento'] as String,
+      titulo: map['titulo'] as String,
+      descripcion: (map['descripcion'] ?? '') as String,
+      categoriaNombre: (map['categoria']?['nombre'] ?? 'Sin categoría') as String,
+      fechaInicio: _parseDate(map['fechainicio']),
+      fechaFin: _parseDate(map['fechafin']),
+      ubicacion: (map['ubicacion'] ?? '') as String,
+      organizadorFK: (map['organizadorfk'] ?? '') as String,
+      status: (map['evento_status']?['nombre'] ?? '') as String,
+      foto: map['foto'] as String?,
+      cupo: map['cupo'] as int?,
     );
   }
 
-  Map<String, dynamic> toMap() {
-    return {
-      'id_evento': idEvento,
-      'titulo': titulo,
-      'descripcion': descripcion,
-      'categoria': categoria,
-      'fecha_inicio': fechaInicio.toIso8601String(),
-      'fecha_fin': fechaFin.toIso8601String(),
-      'lugar': lugar,
-      'organizadorFK': organizadorFK,
-      'estado': estado,
-      'foto': foto,
-    };
+  static DateTime _parseDate(dynamic value) {
+    if (value == null) return DateTime.now();
+    final str = value.toString();
+    // Si es solo fecha (YYYY-MM-DD), agregar hora por defecto
+    if (str.length == 10) {
+      return DateTime.parse('${str}T00:00:00');
+    }
+    return DateTime.parse(str);
   }
 }

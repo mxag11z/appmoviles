@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:appmoviles/services/auth_service.dart';
 import 'package:appmoviles/services/user_service.dart';
+import 'package:appmoviles/providers/notification_provider.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends ConsumerState<LoginScreen> {
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
   final authService = AuthService();
@@ -65,6 +67,9 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       return;
     }
+
+    // Inicializar notificaciones push
+    ref.read(notificationProvider.notifier).initialize();
 
     String targetRoute = '/estudiante/home';
     if (usuario.rol == 2) {
