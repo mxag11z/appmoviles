@@ -84,6 +84,7 @@ class _NotificacionesAdminScreenState extends State<NotificacionesAdminScreen> {
                   rol: rol,
                   correo: correo,
                   foto: foto,
+                  onDelete: () => _deleteUser(context, u),
                 );
               },
             );
@@ -92,6 +93,54 @@ class _NotificacionesAdminScreenState extends State<NotificacionesAdminScreen> {
       ),
     );
   }
+
+  Future<void> _deleteUser(BuildContext context, Map<String, dynamic> user) async {
+    final idUsuario = user['id_usuario']?.toString() ?? '';
+    final nombre = user['nombre'] ?? 'este usuario';
+    
+    if (idUsuario.isEmpty) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Confirmar eliminación'),
+        content: Text('¿Estás seguro de eliminar a $nombre?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text('Eliminar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      await _supabase.from('usuario').delete().eq('id_usuario', idUsuario);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Usuario eliminado')),
+        );
+        await _refresh();
+      }
+    } catch (e) {
+      if (context.mounted) {
+        String errorMsg = 'Error al eliminar: $e';
+        if (e.toString().contains('foreign key') || e.toString().contains('organizador')) {
+          errorMsg = 'No se puede eliminar: este usuario tiene eventos asociados';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMsg)),
+        );
+      }
+    }
+  }
 }
 
 class _UserCard extends StatelessWidget {
@@ -99,12 +148,14 @@ class _UserCard extends StatelessWidget {
   final String rol;
   final String correo;
   final String foto;
+  final VoidCallback? onDelete;
 
   const _UserCard({
     required this.nombre,
     required this.rol,
     required this.correo,
     required this.foto,
+    this.onDelete,
   });
 
   @override
@@ -118,7 +169,22 @@ class _UserCard extends StatelessWidget {
         trailing: IconButton(
           icon: const Icon(Icons.more_vert),
           onPressed: () {
-            // acciones: editar, bloquear, resetear contraseña, etc.
+            showMenu(
+              context: context,
+              position: const RelativeRect.fromLTRB(100, 100, 0, 0),
+              items: [
+                PopupMenuItem(
+                  onTap: onDelete,
+                  child: const Row(
+                    children: [
+                      Icon(Icons.delete, color: Colors.red),
+                      SizedBox(width: 8),
+                      Text('Eliminar', style: TextStyle(color: Colors.red)),
+                    ],
+                  ),
+                ),
+              ],
+            );
           },
         ),
       ),

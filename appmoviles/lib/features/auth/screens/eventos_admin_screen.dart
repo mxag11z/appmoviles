@@ -16,13 +16,40 @@ class _EventosAdminScreenState extends State<EventosAdminScreen> {
   @override
   void initState() {
     super.initState();
-    _eventosFuture = _eventService.getEventos();
+    _eventosFuture = _eventService.getTodosLosEventos();
   }
 
   Future<void> _refresh() async {
     setState(() {
-      _eventosFuture = _eventService.getEventos();
+      _eventosFuture = _eventService.getTodosLosEventos();
     });
+  }
+
+  String _estadoLabel(String statusFk) {
+    switch (statusFk) {
+      case '1': return 'Rechazado';
+      case '2': return 'Aprobado';
+      case '3': return 'Pendiente';
+      default: return 'Desconocido';
+    }
+  }
+
+  Color _estadoBg(String statusFk) {
+    switch (statusFk) {
+      case '1': return Colors.red.shade50;
+      case '2': return Colors.green.shade50;
+      case '3': return Colors.orange.shade50;
+      default: return Colors.grey.shade200;
+    }
+  }
+
+  Color _estadoFg(String statusFk) {
+    switch (statusFk) {
+      case '1': return Colors.red.shade700;
+      case '2': return Colors.green.shade700;
+      case '3': return Colors.orange.shade700;
+      default: return Colors.grey.shade700;
+    }
   }
 
   String _chipLabel(String categoria) {
@@ -71,12 +98,52 @@ class _EventosAdminScreenState extends State<EventosAdminScreen> {
     return '${d.day} de ${meses[d.month - 1]}, $hora:$mm $ampm';
   }
 
+  Future<void> _cambiarEstado(String idEvento, String nuevoEstado) async {
+    try {
+      final messenger = ScaffoldMessenger.of(context);
+      
+      // Mostrar indicador de carga
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Actualizando evento...'),
+          duration: Duration(seconds: 1),
+        ),
+      );
+
+      if (nuevoEstado == 'aprobado') {
+        await _eventService.aprobarEvento(idEvento);
+      } else if (nuevoEstado == 'rechazado') {
+        await _eventService.rechazarEvento(idEvento);
+      } else if (nuevoEstado == 'pendiente') {
+        await _eventService.volverAPendiente(idEvento);
+      }
+
+      // Actualizar la lista
+      await _refresh();
+
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text('Evento ${nuevoEstado == "aprobado" ? "aprobado" : nuevoEstado == "rechazado" ? "rechazado" : "marcado como pendiente"} exitosamente'),
+          backgroundColor: nuevoEstado == 'aprobado' ? Colors.green : nuevoEstado == 'rechazado' ? Colors.red : Colors.orange,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al actualizar evento: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF3F5FA),
       appBar: AppBar(
-        title: const Text('Validación de eventos'),
+        title: const Text('Todos los eventos'),
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
@@ -140,20 +207,40 @@ class _EventosAdminScreenState extends State<EventosAdminScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: _chipBg(e.categoria),
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            _chipLabel(e.categoria),
-                            style: TextStyle(
-                              color: _chipFg(e.categoria),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 12,
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: _chipBg(e.categoria),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                _chipLabel(e.categoria),
+                                style: TextStyle(
+                                  color: _chipFg(e.categoria),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                              ),
                             ),
-                          ),
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: _estadoBg(e.estado),
+                                borderRadius: BorderRadius.circular(999),
+                              ),
+                              child: Text(
+                                _estadoLabel(e.estado),
+                                style: TextStyle(
+                                  color: _estadoFg(e.estado),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 10),
                         Row(
@@ -189,6 +276,20 @@ class _EventosAdminScreenState extends State<EventosAdminScreen> {
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(color: Colors.black54, height: 1.35),
                                   ),
+                                  // Botón de volver a validar
+                                  if (e.estado == '2' || e.estado == '1') ...[
+                                    const SizedBox(height: 12),
+                                    ElevatedButton.icon(
+                                      onPressed: () => _cambiarEstado(e.idEvento, 'pendiente'),
+                                      icon: const Icon(Icons.undo, size: 18),
+                                      label: const Text('Volver a validar'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.orange,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),
@@ -204,44 +305,6 @@ class _EventosAdminScreenState extends State<EventosAdminScreen> {
                                         color: const Color(0xFFEDEFF5),
                                         child: const Icon(Icons.image_outlined, color: Colors.black38),
                                       ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: OutlinedButton(
-                                onPressed: () {
-                                  // TODO: rechazar evento
-                                },
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.black87,
-                                  side: const BorderSide(color: Color(0xFFE0E3EB)),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                ),
-                                child: const Text('Rechazar'),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  // TODO: aprobar evento
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF2F6FED),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(999),
-                                  ),
-                                  padding: const EdgeInsets.symmetric(vertical: 12),
-                                ),
-                                child: const Text('Aprobar'),
                               ),
                             ),
                           ],

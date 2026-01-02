@@ -109,14 +109,30 @@ class _EventosContentState extends State<EventosContent> {
                 chipFg: _chipFg(e.categoria),
                 fechaHora: _fechaHora(e),
                 onAprobar: () async {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Aprobar (pendiente de conectar update)')),
-                  );
+                  try {
+                    await _eventService.aprobarEvento(e.idEvento);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Evento aprobado')),
+                    );
+                    await _refresh();
+                  } catch (err) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error al aprobar: $err')),
+                    );
+                  }
                 },
                 onRechazar: () async {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Rechazar (pendiente de conectar update)')),
-                  );
+                  try {
+                    await _eventService.rechazarEvento(e.idEvento);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Evento rechazado')),
+                    );
+                    await _refresh();
+                  } catch (err) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error al rechazar: $err')),
+                    );
+                  }
                 },
               );
             },
@@ -260,7 +276,7 @@ class _EventoCard extends StatelessWidget {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
                         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                       ),
-                      child: const Text('Aprobar'),
+                      child: const Text('Validar', style: TextStyle(color: Colors.white)),
                     ),
                   ],
                 ),

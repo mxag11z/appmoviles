@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -9,6 +10,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final _supabase = Supabase.instance.client;
   final emailCtrl = TextEditingController();
   final passCtrl = TextEditingController();
   String? error;
@@ -126,14 +128,23 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      // TODO: Implementar login con Supabase y obtener el rol del usuario
-      // Por ahora, navega a admin como placeholder
+      final authResponse = await _supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+
+      if (authResponse.user == null) {
+        throw 'Error al iniciar sesión';
+      }
+
+      debugPrint('✅ Login exitoso: ${authResponse.user!.email}');
+
       if (mounted) {
         context.go("/admin/home");
       }
     } catch (e) {
       if (mounted) {
-        setState(() => error = "Error: $e");
+        setState(() => error = "Credenciales incorrectas o error de conexión");
       }
     } finally {
       if (mounted) {

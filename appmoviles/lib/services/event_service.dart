@@ -3,10 +3,13 @@ import '../data/models/evento_model.dart';
 
 /// Mapa de estados a los IDs definidos en evento_status.
 /// Ajusta los valores si tus IDs son distintos.
+// Ajuste para coincidir con tu BD:
+// En tus registros se ve mayormente status_fk=3 y 2.
+// Usamos 3 como 'pendiente' y 2 como 'aprobado'.
 const Map<String, int> _statusIds = {
-  'pendiente': 1,
+  'pendiente': 3,
   'aprobado': 2,
-  'rechazado': 3,
+  'rechazado': 1,
 };
 
 class EventService {
@@ -17,16 +20,12 @@ class EventService {
 
   Future<List<Evento>> getEventos({String estado = 'pendiente'}) async {
     try {
-      // Primero traer TODOS los eventos sin filtro para debug
+      final statusId = _statusIds[estado] ?? _statusIds['pendiente']!;
       final res = await supabase
           .from('evento')
           .select()
+          .eq('status_fk', statusId)
           .order('fechainicio', ascending: true);
-
-      print('DEBUG: Eventos recibidos: ${res.length}');
-      if (res.isNotEmpty) {
-        print('DEBUG: Primer evento: ${res[0]}');
-      }
 
       final data = res as List<dynamic>;
       return data
@@ -35,6 +34,24 @@ class EventService {
     } catch (e, st) {
       // ignore: avoid_print
       print('Error getEventos: $e\n$st');
+      return [];
+    }
+  }
+
+  Future<List<Evento>> getTodosLosEventos() async {
+    try {
+      final res = await supabase
+          .from('evento')
+          .select()
+          .order('fechainicio', ascending: false);
+
+      final data = res as List<dynamic>;
+      return data
+          .map((item) => Evento.fromMap(item as Map<String, dynamic>))
+          .toList();
+    } catch (e, st) {
+      // ignore: avoid_print
+      print('Error getTodosLosEventos: $e\n$st');
       return [];
     }
   }
@@ -48,6 +65,13 @@ class EventService {
 
   Future<void> rechazarEvento(String idEvento) async {
     final statusId = _statusIds['rechazado']!;
+    await supabase
+        .from('evento')
+        .update({'status_fk': statusId}).eq('id_evento', idEvento);
+  }
+
+  Future<void> volverAPendiente(String idEvento) async {
+    final statusId = _statusIds['pendiente']!;
     await supabase
         .from('evento')
         .update({'status_fk': statusId}).eq('id_evento', idEvento);
