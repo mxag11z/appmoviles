@@ -46,12 +46,19 @@ class CrudEventService {
     }
   }
 
-  //obeter una lista de los eventos (pending)
+  //obeter una lista de los eventos (pending) del organizador actual
   Future<List<Evento>> obtenerEventos() async {
     try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) {
+        print('Usuario no autenticado');
+        return [];
+      }
+
       final response = await _supabase
           .from('evento')
           .select()
+          .eq('organizadorfk', user.id)
           .inFilter('status_fk', [1])
           .order('fechainicio', ascending: false);
 
@@ -64,12 +71,19 @@ class CrudEventService {
     }
   }
 
-  //obeter una lista de los eventos aprobados
+  //obeter una lista de los eventos aprobados del organizador actual
   Future<List<Evento>> obtenerEventosAprobados() async {
     try {
+      final user = _supabase.auth.currentUser;
+      if (user == null) {
+        print('Usuario no autenticado');
+        return [];
+      }
+
       final response = await _supabase
           .from('evento')
           .select()
+          .eq('organizadorfk', user.id)
           .inFilter('status_fk', [3])
           .order('fechainicio', ascending: false);
 
@@ -257,7 +271,7 @@ class CrudEventService {
       // final user = _supabase.auth.currentUser;
       // if (user == null) return 'Usuario no autenticado';
 
-      String fotoUrl = evento.foto;
+      String fotoUrl = evento.foto ?? '';
 
       if (nuevaImagen != null) {
         final ext = nuevaImagen.path.split('.').last;

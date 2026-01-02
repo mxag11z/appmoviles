@@ -309,14 +309,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
               width: double.infinity,
               child: FilledButton(
                 onPressed: () async {
-                  if (!ipnRegex.hasMatch(emailCtrl.text.trim())) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("El correo debe ser @alumno.ipn.mx"),
-                      ),
-                    );
-                    return;
-                  }
+                  // TODO: Descomentar para producción
+                  // if (!ipnRegex.hasMatch(emailCtrl.text.trim())) {
+                  //   ScaffoldMessenger.of(context).showSnackBar(
+                  //     const SnackBar(
+                  //       content: Text("El correo debe ser @alumno.ipn.mx"),
+                  //     ),
+                  //   );
+                  //   return;
+                  // }
 
                   if (passwordMismatch) {
                     ScaffoldMessenger.of(context).showSnackBar(

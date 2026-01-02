@@ -92,9 +92,10 @@ class _RegisterEventScreenState extends State<RegisterEventScreen> {
       fechaFin: fechaFin!,
       ubicacion: ubicacionCtrl.text.trim(),
       cupo: cupo,
-      estado: 1, ///pending
-      organizadorFk: '0594cc50-62ca-46d4-a63f-6264e334db94',
+      status: 'Pendiente',
+      organizadorFK: Supabase.instance.client.auth.currentUser?.id ?? '',
       categoriaFk: categoriaFk,
+      categoriaNombre: categorias[categoriaFk] ?? 'General',
       foto: '',
     );
 

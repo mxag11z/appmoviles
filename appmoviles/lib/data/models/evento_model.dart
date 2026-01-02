@@ -2,6 +2,7 @@ class Evento {
   final String idEvento;
   final String titulo;
   final String descripcion;
+  final int categoriaFk;
   final String categoriaNombre;
   final DateTime fechaInicio;
   final DateTime fechaFin;
@@ -15,6 +16,7 @@ class Evento {
     required this.idEvento,
     required this.titulo,
     required this.descripcion,
+    required this.categoriaFk,
     required this.categoriaNombre,
     required this.fechaInicio,
     required this.fechaFin,
@@ -31,6 +33,7 @@ class Evento {
       idEvento: map['id_evento'] as String,
       titulo: map['titulo'] as String,
       descripcion: (map['descripcion'] ?? '') as String,
+      categoriaFk: (map['categoriafk'] ?? 0) as int,
       categoriaNombre: (map['categoria']?['nombre'] ?? 'Sin categoría') as String,
       fechaInicio: _parseDate(map['fechainicio']),
       fechaFin: _parseDate(map['fechafin']),
@@ -40,6 +43,20 @@ class Evento {
       foto: map['foto'] as String?,
       cupo: map['cupo'] as int?,
     );
+  }
+
+  /// de app a base de datos
+  Map<String, dynamic> toMap() {
+    return {
+      'titulo': titulo,
+      'descripcion': descripcion,
+      'categoriafk': categoriaFk,
+      'fechainicio': fechaInicio.toIso8601String(),
+      'fechafin': fechaFin.toIso8601String(),
+      'ubicacion': ubicacion,
+      'organizadorfk': organizadorFK,
+      'cupo': cupo,
+    };
   }
 
   static DateTime _parseDate(dynamic value) {
@@ -52,7 +69,6 @@ class Evento {
     return DateTime.parse(str);
   }
 
-  
   Evento copyWith({
     String? idEvento,
     String? titulo,
@@ -61,10 +77,11 @@ class Evento {
     DateTime? fechaFin,
     String? ubicacion,
     int? cupo,
-    String? organizadorFk,
+    String? organizadorFK,
     int? categoriaFk,
+    String? categoriaNombre,
     String? foto,
-    int? estado,
+    String? status,
   }) {
     return Evento(
       idEvento: idEvento ?? this.idEvento,
@@ -74,10 +91,11 @@ class Evento {
       fechaFin: fechaFin ?? this.fechaFin,
       ubicacion: ubicacion ?? this.ubicacion,
       cupo: cupo ?? this.cupo,
-      organizadorFk: organizadorFk ?? this.organizadorFk,
+      organizadorFK: organizadorFK ?? this.organizadorFK,
       categoriaFk: categoriaFk ?? this.categoriaFk,
+      categoriaNombre: categoriaNombre ?? this.categoriaNombre,
       foto: foto ?? this.foto,
-      estado: estado ?? this.estado,
+      status: status ?? this.status,
     );
   }
 }

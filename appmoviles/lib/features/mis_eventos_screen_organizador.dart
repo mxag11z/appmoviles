@@ -3,14 +3,14 @@ import 'package:go_router/go_router.dart';
 import '../services/event_service.dart';
 import '../data/models/evento_model.dart';
 
-class MisEventosScreen extends StatefulWidget {
-  const MisEventosScreen({super.key});
+class MisEventosScreenOrg extends StatefulWidget {
+  const MisEventosScreenOrg({super.key});
 
   @override
-  State<MisEventosScreen> createState() => _MisEventosScreenState();
+  State<MisEventosScreenOrg> createState() => _MisEventosScreenState();
 }
 
-class _MisEventosScreenState extends State<MisEventosScreen> {
+class _MisEventosScreenState extends State<MisEventosScreenOrg> {
   final CrudEventService eventService = CrudEventService();
   late Future<List<Evento>> _eventosFuture;
   int _currentIndex = 0;
@@ -237,11 +237,11 @@ class _EventoCard extends StatelessWidget {
           const SizedBox(height: 12),
 
           // IMAGEN (100% segura)
-          if (evento.foto.isNotEmpty)
+          if (evento.foto != null && evento.foto!.isNotEmpty)
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
-                evento.foto,
+                evento.foto!,
                 height: 160,
                 width: double.infinity,
                 fit: BoxFit.cover,

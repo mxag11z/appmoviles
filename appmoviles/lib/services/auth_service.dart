@@ -76,8 +76,8 @@ class AuthService {
       if (usuario.rol == 2) {
         // ORGANIZADOR
         await supabase.from("organizador").upsert({
-          "id_usuario": userId,
-        }, onConflict: "id_usuario");
+          "idorganizador": userId,
+        }, onConflict: "idorganizador");
       }
 
       return null;

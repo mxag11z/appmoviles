@@ -1,4 +1,7 @@
 import 'package:appmoviles/features/estudiante/screens/shell/student_shell.dart';
+import 'package:appmoviles/features/organizador/screens/shell/organizer_shell.dart';
+import 'package:appmoviles/features/organizador/screens/perfil/perfil_organizador_screen.dart';
+import 'package:appmoviles/features/organizador/screens/mis_eventos/mis_eventos_organizador_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -7,8 +10,6 @@ import '../features/auth/screens/login.dart';
 import '../features/auth/screens/register.dart';
 import '../features/organizer_organizador.dart';
 import '../features/register_event_organizador.dart';
-import '../features/mis_eventos_screen_organizador.dart';
-import '../features/eventos_aprobados_organizador.dart';
 import '../features/todos_eventos_usuarioGeneral.dart';
 import '../features/asistentes_evento_organizador.dart';
 import '../features/auth/screens/forgot_password.dart';
@@ -47,7 +48,7 @@ final GoRouter appRouter = GoRouter(
     // =========================
     GoRoute(path: "/onboarding", builder: (_, __) => const OnboardingScreen()),
     GoRoute(path: "/login", builder: (_, __) => const LoginScreen()),
-    GoRoute(path: "/register", builder: (_, _) => const RegisterScreen()),
+    GoRoute(path: "/register", builder: (_, __) => const RegisterScreen()),
 
     GoRoute(
       path: "/forgot-password",
@@ -62,7 +63,7 @@ final GoRouter appRouter = GoRouter(
     ),
 
     // =========================
-    // DETALLE DE EVENTO (sin shell/navbar)
+    // DETALLE DE EVENTO ESTUDIANTE (sin shell - usa push)
     // =========================
     GoRoute(
       path: "/estudiante/evento",
@@ -84,8 +85,6 @@ final GoRouter appRouter = GoRouter(
           path: "/estudiante/home",
           builder: (_, __) => const HomeScreen(),
         ),
-
-        // placeholders por ahora (pon aquí tus pantallas reales)
         GoRoute(
           path: "/estudiante/calendario",
           builder: (_, __) => const CalendarioScreen(),
@@ -102,31 +101,34 @@ final GoRouter appRouter = GoRouter(
     ),
 
     // =========================
-    // ORGANIZADOR / ADMIN (sin shell por ahora)
+    // ORGANIZADOR (con shell/navbar)
+    // =========================
+    ShellRoute(
+      builder: (context, state, child) {
+        return OrganizerShell(child: child);
+      },
+      routes: [
+        GoRoute(
+          path: "/organizador/home",
+          builder: (_, __) => const OrganizerHomeScreen(),
+        ),
+        GoRoute(
+          path: "/organizador/mis-eventos",
+          builder: (_, __) => const MisEventosOrganizadorScreen(),
+        ),
+        GoRoute(
+          path: "/organizador/perfil",
+          builder: (_, __) => const PerfilOrganizadorScreen(),
+        ),
+      ],
+    ),
+
+    // =========================
+    // ORGANIZADOR (sin shell - pantallas que usan push/pop)
     // =========================
     GoRoute(
-      path: "/organizador/home",
-      builder: (context, state) => const OrganizerHomeScreen(),
-    ),
-    GoRoute(
-      path: "/admin/home",
-      builder: (context, state) => const PlaceholderScreen("Home Admin"),
-    ),
-    GoRoute(
-      path: "/organizador/registrar_evento",
-      builder: (context, state) => const RegisterEventScreen(), 
-    ),
-    GoRoute(
-      path: "/organizador/mis_eventos",
-      builder: (context, state) => const MisEventosScreen(),
-    ),
-    GoRoute(
-      path: "/organizador/eventos-aprobados",
-      builder: (context, state) => const EventosAprobadosScreen(),
-    ),
-    GoRoute(
-      path: "/all-eventos",
-      builder: (context, state) => const AllEventosScreen(),
+      path: "/organizador/registrar-evento",
+      builder: (_, __) => const RegisterEventScreen(),
     ),
     GoRoute(
       path: '/organizador/evento/:eventoId/invitados',
@@ -136,5 +138,20 @@ final GoRouter appRouter = GoRouter(
       },
     ),
 
+    // =========================
+    // ADMIN (sin shell por ahora)
+    // =========================
+    GoRoute(
+      path: "/admin/home",
+      builder: (_, __) => const PlaceholderScreen("Home Admin"),
+    ),
+
+    // =========================
+    // PÚBLICO (sin autenticación)
+    // =========================
+    GoRoute(
+      path: "/all-eventos",
+      builder: (_, __) => const AllEventosScreen(),
+    ),
   ],
 );

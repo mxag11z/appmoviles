@@ -60,7 +60,7 @@ class OrganizerHomeScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                onPressed: () => context.go('/organizador/registrar_evento'),
+                onPressed: () => context.push('/organizador/registrar-evento'),
                 child: const Text(
                   "Registrar evento",
                   style: TextStyle(fontSize: 18),

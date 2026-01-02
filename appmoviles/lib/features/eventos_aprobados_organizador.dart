@@ -273,10 +273,11 @@ class _EventosAprobadosScreenState extends State<EventosAprobadosScreen> {
                               fechaFin: fechaFin,
                               ubicacion: evento.ubicacion,
                               cupo: int.parse(cupoCtrl.text),
-                              organizadorFk: evento.organizadorFk,
+                              organizadorFK: evento.organizadorFK,
                               categoriaFk: categoriaSeleccionada,
+                              categoriaNombre: categorias[categoriaSeleccionada] ?? 'Sin categoría',
                               foto: evento.foto,
-                              estado: evento.estado,
+                              status: evento.status,
                             );
 
                             final error = await eventService.editarEvento(
@@ -413,11 +414,11 @@ class _EventoAprobadoCard extends StatelessWidget {
           const SizedBox(height: 12),
 
           ///imagen
-          if (evento.foto.isNotEmpty)
+          if (evento.foto != null && evento.foto!.isNotEmpty)
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
-                evento.foto,
+                evento.foto!,
                 height: 150,
                 width: double.infinity,
                 fit: BoxFit.cover,
