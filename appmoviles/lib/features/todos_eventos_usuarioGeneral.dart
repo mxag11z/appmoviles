@@ -265,7 +265,7 @@ class _EventoCard extends StatelessWidget {
     final categoriaNombre =
         categorias[evento.categoriaFk] ?? 'Sin categoría';
 
-    final bool estaCerrado = evento.estado == 2;
+    final bool estaCerrado = evento.status == 2;
 
     return Opacity(
       opacity: estaCerrado ? 0.45 : 1,
@@ -338,11 +338,11 @@ class _EventoCard extends StatelessWidget {
 
             const SizedBox(height: 12),
 
-            if (evento.foto.isNotEmpty)
+            if (evento.foto != null && evento.foto!.isNotEmpty)
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: Image.network(
-                  evento.foto,
+                  evento.foto!,
                   height: 150,
                   width: double.infinity,
                   fit: BoxFit.cover,

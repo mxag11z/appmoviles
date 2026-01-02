@@ -5,7 +5,7 @@ class OrganizerModel {
 
   factory OrganizerModel.fromMap(Map<String, dynamic> map) {
     return OrganizerModel(
-      idUsuario: map["id_usuario"],
+      idUsuario: map["idorganizador"],
     );
   }
 }

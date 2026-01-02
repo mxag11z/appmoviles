@@ -61,12 +61,13 @@ class RegistroEventoService {
   }
 
   /// Obtiene todos los eventos en los que el estudiante está registrado
+  /// Solo muestra eventos aprobados (status_fk = 3)
   Future<List<Evento>> fetchMyRegisteredEvents(String estudianteId) async {
     final data = await supabase
         .from('estudiante_evento')
         .select('''
           id_evento,
-          evento!estudiante_evento_event_fk (
+          evento!estudiante_evento_event_fk!inner (
             id_evento,
             titulo,
             descripcion,
@@ -74,13 +75,16 @@ class RegistroEventoService {
             fechafin,
             ubicacion,
             organizadorfk,
+            categoriafk,
             foto,
             cupo,
+            status_fk,
             categoria:categoriafk ( nombre ),
             evento_status:status_fk ( nombre )
           )
         ''')
-        .eq('id_estudiante', estudianteId);
+        .eq('id_estudiante', estudianteId)
+        .eq('evento.status_fk', 3); // Solo eventos aprobados
 
     return (data as List).map((item) {
       final eventoData = item['evento'] as Map<String, dynamic>;
