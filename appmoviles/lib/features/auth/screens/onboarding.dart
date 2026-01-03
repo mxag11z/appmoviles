@@ -59,6 +59,27 @@ class OnboardingScreen extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 12), 
+
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: const BorderSide(
+                    color: Color(0xFF2563EB),
+                  ), 
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () => context.go("/all-eventos"),
+                child: const Text(
+                  "Ver eventos",
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+            ),
           ],
         ),
       ),

@@ -39,29 +39,24 @@ class StorageService {
     }
   }
 
-  /// 📸 Seleccionar imagen de evento
-  Future<File?> pickEventImage() async {
-    final XFile? picked = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 70,
-    );
-    if (picked == null) return null;
-    return File(picked.path);
-  }
-
-  /// ☁️ Subir imagen SOLO PARA EVENTOS
+  /// Subir imagen para eventos
   Future<String?> uploadEventImage(File file) async {
     try {
-      final ext = file.path.split('.').last;
-      final fileName = "evento_${DateTime.now().millisecondsSinceEpoch}.$ext";
+      final fileName =
+          "event_${DateTime.now().millisecondsSinceEpoch}.${file.path.split('.').last}";
 
       await supabase.storage
-          .from("eventos")
+          .from("events")
           .upload(fileName, file, fileOptions: const FileOptions(upsert: true));
 
-      return supabase.storage.from("eventos").getPublicUrl(fileName);
+      final String publicUrl = supabase.storage
+          .from("events")
+          .getPublicUrl(fileName);
+
+      print(  "Imagen subida con URL: $publicUrl");
+      return publicUrl;
     } catch (e) {
-      print("Error subiendo imagen de evento: $e");
+      print("Error en Storage: $e");
       return null;
     }
   }

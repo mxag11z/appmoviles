@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:appmoviles/services/storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -119,7 +120,8 @@ class PerfilOrganizadorScreen extends ConsumerWidget {
                         subtitle: profile.nombreCompleto.isNotEmpty
                             ? profile.nombreCompleto
                             : 'No configurado',
-                        onTap: () => _showEditNombreDialog(context, ref, profile),
+                        onTap: () =>
+                            _showEditNombreDialog(context, ref, profile),
                       ),
                     ],
                   ),
@@ -215,7 +217,9 @@ class PerfilOrganizadorScreen extends ConsumerWidget {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              final success = await ref.read(profileProvider.notifier).updateNombre(
+              final success = await ref
+                  .read(profileProvider.notifier)
+                  .updateNombre(
                     nombre: nombreController.text.trim(),
                     apellidoPaterno: apPaternoController.text.trim(),
                     apellidoMaterno: apMaternoController.text.trim(),
@@ -227,8 +231,9 @@ class PerfilOrganizadorScreen extends ConsumerWidget {
                     content: Text(
                       success ? 'Nombre actualizado' : 'Error al actualizar',
                     ),
-                    backgroundColor:
-                        success ? const Color(0xFF059669) : const Color(0xFFDC2626),
+                    backgroundColor: success
+                        ? const Color(0xFF059669)
+                        : const Color(0xFFDC2626),
                   ),
                 );
               }
@@ -283,10 +288,7 @@ class _ProfilePhoto extends ConsumerWidget {
   final String? fotoUrl;
   final bool isLoading;
 
-  const _ProfilePhoto({
-    required this.fotoUrl,
-    required this.isLoading,
-  });
+  const _ProfilePhoto({required this.fotoUrl, required this.isLoading});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -306,11 +308,7 @@ class _ProfilePhoto extends ConsumerWidget {
                 : null,
           ),
           child: fotoUrl == null || fotoUrl!.isEmpty
-              ? const Icon(
-                  Icons.person,
-                  size: 60,
-                  color: Color(0xFF6B7280),
-                )
+              ? const Icon(Icons.person, size: 60, color: Color(0xFF6B7280))
               : null,
         ),
         Positioned(
@@ -334,11 +332,7 @@ class _ProfilePhoto extends ConsumerWidget {
                         color: Colors.white,
                       ),
                     )
-                  : const Icon(
-                      Icons.camera_alt,
-                      size: 18,
-                      color: Colors.white,
-                    ),
+                  : const Icon(Icons.camera_alt, size: 18, color: Colors.white),
             ),
           ),
         ),
@@ -356,6 +350,9 @@ class _ProfilePhoto extends ConsumerWidget {
     if (picked == null) return;
 
     final file = File(picked.path);
+
+    // Aquí llamas al método que acabamos de arreglar arriba
+    // Este método ahora sí sube al bucket Y actualiza la DB
     final success = await ref.read(profileProvider.notifier).updateFoto(file);
 
     if (context.mounted) {
@@ -364,8 +361,9 @@ class _ProfilePhoto extends ConsumerWidget {
           content: Text(
             success ? 'Foto actualizada' : 'Error al actualizar la foto',
           ),
-          backgroundColor:
-              success ? const Color(0xFF059669) : const Color(0xFFDC2626),
+          backgroundColor: success
+              ? const Color(0xFF059669)
+              : const Color(0xFFDC2626),
         ),
       );
     }
@@ -376,10 +374,7 @@ class _SectionCard extends StatelessWidget {
   final String title;
   final List<Widget> children;
 
-  const _SectionCard({
-    required this.title,
-    required this.children,
-  });
+  const _SectionCard({required this.title, required this.children});
 
   @override
   Widget build(BuildContext context) {
@@ -439,7 +434,9 @@ class _InfoTile extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: (titleColor ?? const Color(0xFF2563EB)).withValues(alpha: 0.1),
+                color: (titleColor ?? const Color(0xFF2563EB)).withValues(
+                  alpha: 0.1,
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -475,10 +472,7 @@ class _InfoTile extends StatelessWidget {
               ),
             ),
             if (showArrow)
-              const Icon(
-                Icons.chevron_right,
-                color: Color(0xFF6B7280),
-              ),
+              const Icon(Icons.chevron_right, color: Color(0xFF6B7280)),
           ],
         ),
       ),
@@ -588,11 +582,7 @@ class _NotificationTile extends StatelessWidget {
               color: const Color(0xFF2563EB).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              color: const Color(0xFF2563EB),
-              size: 22,
-            ),
+            child: Icon(icon, color: const Color(0xFF2563EB), size: 22),
           ),
           const SizedBox(width: 14),
           Expanded(

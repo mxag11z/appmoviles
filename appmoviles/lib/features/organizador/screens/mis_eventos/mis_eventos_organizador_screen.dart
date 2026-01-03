@@ -44,7 +44,8 @@ class _MisEventosOrganizadorScreenState
 
   void _cargarEventos() {
     _pendientesFuture = eventService.obtenerEventos(); // status pending
-    _aprobadosFuture = eventService.obtenerEventosAprobados(); // status approved
+    _aprobadosFuture = eventService
+        .obtenerEventosAprobados(); // status approved
   }
 
   void _refresh() {
@@ -69,14 +70,8 @@ class _MisEventosOrganizadorScreenState
           unselectedLabelColor: const Color(0xFF6B7280),
           indicatorColor: const Color(0xFF2563EB),
           tabs: const [
-            Tab(
-              icon: Icon(Icons.hourglass_top),
-              text: 'Pendientes',
-            ),
-            Tab(
-              icon: Icon(Icons.check_circle),
-              text: 'Aprobados',
-            ),
+            Tab(icon: Icon(Icons.hourglass_top), text: 'Pendientes'),
+            Tab(icon: Icon(Icons.check_circle), text: 'Aprobados'),
           ],
         ),
       ),
@@ -147,8 +142,10 @@ class _MisEventosOrganizadorScreenState
                   children: [
                     const Text(
                       'Editar evento',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     TextField(
@@ -259,10 +256,13 @@ class _MisEventosOrganizadorScreenState
                                 fechaInicio: fechaInicio,
                                 fechaFin: fechaFin,
                                 ubicacion: evento.ubicacion,
-                                cupo: int.tryParse(cupoCtrl.text) ?? evento.cupo,
+                                cupo:
+                                    int.tryParse(cupoCtrl.text) ?? evento.cupo,
                                 organizadorFK: evento.organizadorFK,
                                 categoriaFk: categoriaSeleccionada,
-                                categoriaNombre: categorias[categoriaSeleccionada] ?? 'Sin categoría',
+                                categoriaNombre:
+                                    categorias[categoriaSeleccionada] ??
+                                    'Sin categoría',
                                 foto: evento.foto,
                                 status: evento.status,
                               );
@@ -393,8 +393,9 @@ class _EventosList extends StatelessWidget {
                 evento: evento,
                 isPending: isPendingTab,
                 onAprobar: onAprobar != null ? () => onAprobar!(evento) : null,
-                onRechazar:
-                    onRechazar != null ? () => onRechazar!(evento) : null,
+                onRechazar: onRechazar != null
+                    ? () => onRechazar!(evento)
+                    : null,
                 onEditar: onEditar != null ? () => onEditar!(evento) : null,
                 onVerInvitados: onVerInvitados != null
                     ? () => onVerInvitados!(evento)
@@ -446,8 +447,9 @@ class _EventoCard extends StatelessWidget {
           // Imagen
           if (evento.foto != null && evento.foto!.isNotEmpty)
             ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
               child: Image.network(
                 evento.foto!,
                 height: 150,
@@ -468,8 +470,10 @@ class _EventoCard extends StatelessWidget {
               children: [
                 // Categoría
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFF2563EB).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -501,19 +505,27 @@ class _EventoCard extends StatelessWidget {
                 // Fecha y ubicación
                 Row(
                   children: [
-                    const Icon(Icons.calendar_today,
-                        size: 14, color: Color(0xFF6B7280)),
+                    const Icon(
+                      Icons.calendar_today,
+                      size: 14,
+                      color: Color(0xFF6B7280),
+                    ),
                     const SizedBox(width: 4),
                     Text(
-                      '${evento.fechaInicio.day}/${evento.fechaInicio.month}/${evento.fechaInicio.year}',
+                      // Formato: DD/MM/YYYY HH:mm
+                      '${evento.fechaInicio.day}/${evento.fechaInicio.month}/${evento.fechaInicio.year} '
+                      '${evento.fechaInicio.hour}:${evento.fechaInicio.minute.toString().padLeft(2, "0")}',
                       style: const TextStyle(
                         fontSize: 13,
                         color: Color(0xFF6B7280),
                       ),
                     ),
                     const SizedBox(width: 16),
-                    const Icon(Icons.location_on,
-                        size: 14, color: Color(0xFF6B7280)),
+                    const Icon(
+                      Icons.location_on,
+                      size: 14,
+                      color: Color(0xFF6B7280),
+                    ),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
@@ -533,8 +545,11 @@ class _EventoCard extends StatelessWidget {
                 // Cupo
                 Row(
                   children: [
-                    const Icon(Icons.people,
-                        size: 14, color: Color(0xFF6B7280)),
+                    const Icon(
+                      Icons.people,
+                      size: 14,
+                      color: Color(0xFF6B7280),
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       'Cupo: ${evento.cupo ?? 'Sin límite'}',

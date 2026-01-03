@@ -5,42 +5,17 @@ import '../data/models/evento_model.dart';
 class CrudEventService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  //crear el evento
-  Future<String?> crearEvento({required Evento evento, File? imagen}) async {
+  /// Crear un nuevo evento
+  Future<String?> crearEvento({required Evento evento}) async {
     try {
-      // final user = _supabase.auth.currentUser;
-
-      // if (user == null) {
-      //   return 'Usuario no autenticado';
-      // }
-
-      String fotoUrl = '';
-
-      //si la imagen del evento si existe
-      if (imagen != null) {
-        final ext = imagen.path.split('.').last;
-        final fileName =
-            'eventos/${DateTime.now().millisecondsSinceEpoch}.$ext';
-
-        final uploadResponse = await _supabase.storage
-            .from('eventos')
-            .upload(fileName, imagen);
-
-        fotoUrl = _supabase.storage.from('eventos').getPublicUrl(fileName);
-      } else {
-        print('no hay imagen');
-      }
-
       final data = evento.toMap();
-      data['foto'] = fotoUrl;
 
-      data.forEach((k, v) => print('   $k → $v (${v.runtimeType})'));
+      await _supabase.from('evento').insert(data);
 
-      final response = await _supabase.from('evento').insert(data).select();
-
-      return null;
+      print('Inserción en base de datos exitosa');
+      return null; 
     } catch (e, stack) {
-      print(e);
+      print('Error en crearEvento (DB): $e');
       print(stack);
       return e.toString();
     }
@@ -134,60 +109,49 @@ class CrudEventService {
 
   //para filtrar eventos
   Future<List<Evento>> obtenerEventosFiltrados({
-  int? categoria,
-  String? ubicacion,
-  DateTime? fechaInicio,
-  DateTime? fechaFin,
-}) async {
-  try {
-    var query = _supabase
-        .from('evento')
-        .select()
-        .inFilter('status_fk', [1, 2, 3]);
+    int? categoria,
+    String? ubicacion,
+    DateTime? fechaInicio,
+    DateTime? fechaFin,
+  }) async {
+    try {
+      var query = _supabase.from('evento').select().inFilter('status_fk', [
+        1,
+        2,
+        3,
+      ]);
 
-    // filtro por categoria
-    if (categoria != null) {
-      query = query.eq('categoriafk', categoria);
+      // filtro por categoria
+      if (categoria != null) {
+        query = query.eq('categoriafk', categoria);
+      }
+
+      // filtro por ubicacion
+      if (ubicacion != null && ubicacion.isNotEmpty) {
+        query = query.ilike('ubicacion', '%$ubicacion%');
+      }
+
+      // FILTRO FECHA INICIO
+      if (fechaInicio != null) {
+        query = query.gte('fechainicio', fechaInicio.toIso8601String());
+      }
+
+      // filtro fecha fin
+      if (fechaFin != null) {
+        query = query.lte('fechafin', fechaFin.toIso8601String());
+      }
+
+      // ordenar por fecha inicio descendente
+      final response = await query.order('fechainicio', ascending: false);
+
+      print('obtenerEventosFiltrados response: $response');
+
+      return response.map<Evento>((e) => Evento.fromMap(e)).toList();
+    } catch (e) {
+      print('Error obteniendo eventos filtrados: $e');
+      rethrow;
     }
-
-    // filtro por ubicacion
-    if (ubicacion != null && ubicacion.isNotEmpty) {
-      query = query.ilike('ubicacion', '%$ubicacion%');
-    }
-
-    // FILTRO FECHA INICIO
-    if (fechaInicio != null) {
-      query = query.gte(
-        'fechainicio',
-        fechaInicio.toIso8601String(),
-      );
-    }
-
-    // filtro fecha fin
-    if (fechaFin != null) {
-      query = query.lte(
-        'fechafin',
-        fechaFin.toIso8601String(),
-      );
-    }
-
-    // ordenar por fecha inicio descendente
-    final response = await query.order(
-      'fechainicio',
-      ascending: false,
-    );
-
-    print('obtenerEventosFiltrados response: $response');
-
-    return response
-        .map<Evento>((e) => Evento.fromMap(e))
-        .toList();
-  } catch (e) {
-    print('Error obteniendo eventos filtrados: $e');
-    rethrow;
   }
-}
-
 
   //cancelar evento
   Future<String?> cancelarEvento(String idEvento) async {

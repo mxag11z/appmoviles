@@ -5,6 +5,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'router/app_router.dart';
 import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+//mio
+import 'package:flutter/foundation.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,7 +15,11 @@ Future<void> main() async {
   await dotenv.load(fileName: ".env");
 
   /// inicializacion de Firebase
-  await Firebase.initializeApp();
+  //await Firebase.initializeApp();
+
+  if (!kIsWeb) {
+    await Firebase.initializeApp();
+  }
 
   /// inicializacion de supabase a traves de la variable de entorno
   await Supabase.initialize(
@@ -22,13 +28,15 @@ Future<void> main() async {
   );
 
   /// forzando http en android en caso de ser necesario
-  HttpOverrides.global = MyHttpOverrides();
+  /// borrar el comenatio de abajo
+  ///HttpOverrides.global = MyHttpOverrides();
+  ///
+  /// SOLO ANDROID / IOS
+  if (!kIsWeb) {
+    HttpOverrides.global = MyHttpOverrides();
+  }
 
-  runApp(
-    const ProviderScope(
-      child: MyApp(),
-    ),
-  );
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
