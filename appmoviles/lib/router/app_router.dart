@@ -22,6 +22,7 @@ import 'package:appmoviles/features/estudiante/screens/perfil/perfil_screen.dart
 import 'package:appmoviles/features/estudiante/screens/calendario/calendario_screen.dart';
 import 'package:appmoviles/data/models/evento_model.dart';
 
+import '../features/auth/screens/admin_shell.dart';
 
 class PlaceholderScreen extends StatelessWidget {
   final String text;
@@ -143,7 +144,7 @@ final GoRouter appRouter = GoRouter(
     // =========================
     GoRoute(
       path: "/admin/home",
-      builder: (_, __) => const PlaceholderScreen("Home Admin"),
+      builder: (context, state) => const AdminShell(),
     ),
 
     // =========================

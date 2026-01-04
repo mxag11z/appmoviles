@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:appmoviles/services/auth_service.dart';
 import 'package:appmoviles/services/user_service.dart';
 import 'package:appmoviles/providers/notification_provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -18,6 +19,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final authService = AuthService();
   final userService = UserService();
 
+  final _supabase = Supabase.instance.client;
+
+  String? error;
   bool isLoading = false;
 
   @override
@@ -157,4 +161,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
     );
   }
+
+  
 }

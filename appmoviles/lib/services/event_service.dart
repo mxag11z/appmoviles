@@ -134,60 +134,49 @@ class CrudEventService {
 
   //para filtrar eventos
   Future<List<Evento>> obtenerEventosFiltrados({
-  int? categoria,
-  String? ubicacion,
-  DateTime? fechaInicio,
-  DateTime? fechaFin,
-}) async {
-  try {
-    var query = _supabase
-        .from('evento')
-        .select()
-        .inFilter('status_fk', [1, 2, 3]);
+    int? categoria,
+    String? ubicacion,
+    DateTime? fechaInicio,
+    DateTime? fechaFin,
+  }) async {
+    try {
+      var query = _supabase.from('evento').select().inFilter('status_fk', [
+        1,
+        2,
+        3,
+      ]);
 
-    // filtro por categoria
-    if (categoria != null) {
-      query = query.eq('categoriafk', categoria);
+      // filtro por categoria
+      if (categoria != null) {
+        query = query.eq('categoriafk', categoria);
+      }
+
+      // filtro por ubicacion
+      if (ubicacion != null && ubicacion.isNotEmpty) {
+        query = query.ilike('ubicacion', '%$ubicacion%');
+      }
+
+      // FILTRO FECHA INICIO
+      if (fechaInicio != null) {
+        query = query.gte('fechainicio', fechaInicio.toIso8601String());
+      }
+
+      // filtro fecha fin
+      if (fechaFin != null) {
+        query = query.lte('fechafin', fechaFin.toIso8601String());
+      }
+
+      // ordenar por fecha inicio descendente
+      final response = await query.order('fechainicio', ascending: false);
+
+      print('obtenerEventosFiltrados response: $response');
+
+      return response.map<Evento>((e) => Evento.fromMap(e)).toList();
+    } catch (e) {
+      print('Error obteniendo eventos filtrados: $e');
+      rethrow;
     }
-
-    // filtro por ubicacion
-    if (ubicacion != null && ubicacion.isNotEmpty) {
-      query = query.ilike('ubicacion', '%$ubicacion%');
-    }
-
-    // FILTRO FECHA INICIO
-    if (fechaInicio != null) {
-      query = query.gte(
-        'fechainicio',
-        fechaInicio.toIso8601String(),
-      );
-    }
-
-    // filtro fecha fin
-    if (fechaFin != null) {
-      query = query.lte(
-        'fechafin',
-        fechaFin.toIso8601String(),
-      );
-    }
-
-    // ordenar por fecha inicio descendente
-    final response = await query.order(
-      'fechainicio',
-      ascending: false,
-    );
-
-    print('obtenerEventosFiltrados response: $response');
-
-    return response
-        .map<Evento>((e) => Evento.fromMap(e))
-        .toList();
-  } catch (e) {
-    print('Error obteniendo eventos filtrados: $e');
-    rethrow;
   }
-}
-
 
   //cancelar evento
   Future<String?> cancelarEvento(String idEvento) async {
@@ -311,6 +300,96 @@ class CrudEventService {
       return null;
     } catch (e) {
       print('Error editarEventoConImagen: $e');
+      return e.toString();
+    }
+  }
+}
+
+/// Mapa de estados a los IDs definidos en evento_status.
+/// Ajusta los valores si tus IDs son distintos.
+// Ajuste para coincidir con tu BD:
+// En tus registros se ve mayormente status_fk=3 y 2.
+// Usamos 3 como 'pendiente' y 2 como 'aprobado'.
+const Map<String, int> _statusIds = {
+  'pendiente': 3,
+  'aprobado': 2,
+  'rechazado': 1,
+};
+
+class EventService {
+  final SupabaseClient supabase;
+
+  EventService({SupabaseClient? client})
+    : supabase = client ?? Supabase.instance.client;
+
+  Future<List<Evento>> getEventos() async {
+    try {
+      final statusId = 1;
+      final res = await supabase
+          .from('evento')
+          .select()
+          .eq('status_fk', statusId)
+          .order('fechainicio', ascending: true);
+
+      final data = res as List<dynamic>;
+      return data
+          .map((item) => Evento.fromMap(item as Map<String, dynamic>))
+          .toList();
+    } catch (e, st) {
+      // ignore: avoid_print
+      print('Error getEventos: $e\n$st');
+      return [];
+    }
+  }
+
+  Future<List<Evento>> getTodosLosEventos() async {
+    try {
+      final res = await supabase
+          .from('evento')
+          .select()
+          .order('fechainicio', ascending: false);
+
+      final data = res as List<dynamic>;
+      print(  'getTodosLosEventos data: $data');
+      return data
+          .map((item) => Evento.fromMap(item as Map<String, dynamic>))
+          .toList();
+    } catch (e, st) {
+      // ignore: avoid_print
+      print('Error getTodosLosEventos: $e\n$st');
+      return [];
+    }
+  }
+
+  Future<void> aprobarEvento(String idEvento) async {
+     await supabase
+      .from('evento')
+      .update({'status_fk': 3})
+      .eq('id_evento', idEvento);
+  }
+
+  Future<void> rechazarEvento(String idEvento) async {
+    await supabase
+        .from('evento')
+        .update({'status_fk': 2})
+        .eq('id_evento', idEvento);
+  }
+
+  Future<void> volverAPendiente(String idEvento) async {
+    final statusId = _statusIds['pendiente']!;
+    await supabase
+        .from('evento')
+        .update({'status_fk': statusId})
+        .eq('id_evento', idEvento);
+  }
+
+  Future<String?> createEvento(Evento evento) async {
+    try {
+      await supabase.from('evento').insert(evento.toMap());
+      return null;
+    } catch (e, st) {
+      // ignore: avoid_print
+      print('Error createEvento: $e\n$st');
       return e.toString();
     }
   }
