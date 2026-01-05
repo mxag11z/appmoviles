@@ -18,8 +18,8 @@ class NotificationService {
 
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications =
-      FlutterLocalNotificationsPlugin();
-  final SupabaseClient _supabase = Supabase.instance.client;
+      FlutterLocalNotificationsPlugin(); //plugin para la barra de estados del telefomno
+  final SupabaseClient _supabase = Supabase.instance.client; //cliente supabase
 
   bool _isInitialized = false;
 
@@ -48,7 +48,7 @@ class NotificationService {
         android: androidSettings,
         iOS: iosSettings,
       ),
-      onDidReceiveNotificationResponse: _onNotificationTap,
+      onDidReceiveNotificationResponse: _onNotificationTap, //callback cuando un usuario da click en la notificacion
     );
 
     // Crear canal de Android
@@ -58,10 +58,10 @@ class NotificationService {
         ?.createNotificationChannel(_channel);
 
     // Configurar handlers de FCM
+    //cuando esta cerrada la app
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
     FirebaseMessaging.onMessageOpenedApp.listen(_handleMessageOpenedApp);
-
     _isInitialized = true;
   }
 
@@ -73,6 +73,7 @@ class NotificationService {
       sound: true,
       provisional: false,
     );
+    //cuando se muestra en pantalla el modal para dar permisos de notificaciones
 
     return settings.authorizationStatus == AuthorizationStatus.authorized ||
         settings.authorizationStatus == AuthorizationStatus.provisional;
@@ -91,16 +92,29 @@ class NotificationService {
     final token = await getToken();
     if (token == null) return;
 
-    // Guardar token en la tabla usuario
+    // Primero eliminar este token de CUALQUIER otro usuario
+    // Esto evita que dos usuarios tengan el mismo token (mismo dispositivo)
+    await _supabase.from('usuario').update({
+      'fcm_token': null,
+      'fcm_token_updated_at': null,
+    }).eq('fcm_token', token).neq('id_usuario', userId);
+
+    // Ahora guardar el token solo para el usuario actual
     await _supabase.from('usuario').update({
       'fcm_token': token,
       'fcm_token_updated_at': DateTime.now().toIso8601String(),
     }).eq('id_usuario', userId);
 
-    print('Token FCM guardado: $token');
+    print('Token FCM guardado para usuario $userId: $token');
 
     // Escuchar cambios de token
     _messaging.onTokenRefresh.listen((newToken) async {
+      // Limpiar token anterior de otros usuarios
+      await _supabase.from('usuario').update({
+        'fcm_token': null,
+        'fcm_token_updated_at': null,
+      }).eq('fcm_token', newToken).neq('id_usuario', userId);
+
       await _supabase.from('usuario').update({
         'fcm_token': newToken,
         'fcm_token_updated_at': DateTime.now().toIso8601String(),
@@ -190,13 +204,4 @@ class NotificationService {
     }
   }
 
-  /// Suscribirse a un tema (opcional, para notificaciones masivas)
-  Future<void> subscribeToTopic(String topic) async {
-    await _messaging.subscribeToTopic(topic);
-  }
-
-  /// Desuscribirse de un tema
-  Future<void> unsubscribeFromTopic(String topic) async {
-    await _messaging.unsubscribeFromTopic(topic);
-  }
 }

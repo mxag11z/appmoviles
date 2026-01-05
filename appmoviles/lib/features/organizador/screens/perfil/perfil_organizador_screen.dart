@@ -119,7 +119,8 @@ class PerfilOrganizadorScreen extends ConsumerWidget {
                         subtitle: profile.nombreCompleto.isNotEmpty
                             ? profile.nombreCompleto
                             : 'No configurado',
-                        onTap: () => _showEditNombreDialog(context, ref, profile),
+                        onTap: () =>
+                            _showEditNombreDialog(context, ref, profile),
                       ),
                     ],
                   ),
@@ -215,7 +216,9 @@ class PerfilOrganizadorScreen extends ConsumerWidget {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              final success = await ref.read(profileProvider.notifier).updateNombre(
+              final success = await ref
+                  .read(profileProvider.notifier)
+                  .updateNombre(
                     nombre: nombreController.text.trim(),
                     apellidoPaterno: apPaternoController.text.trim(),
                     apellidoMaterno: apMaternoController.text.trim(),
@@ -227,8 +230,9 @@ class PerfilOrganizadorScreen extends ConsumerWidget {
                     content: Text(
                       success ? 'Nombre actualizado' : 'Error al actualizar',
                     ),
-                    backgroundColor:
-                        success ? const Color(0xFF059669) : const Color(0xFFDC2626),
+                    backgroundColor: success
+                        ? const Color(0xFF059669)
+                        : const Color(0xFFDC2626),
                   ),
                 );
               }
@@ -283,10 +287,7 @@ class _ProfilePhoto extends ConsumerWidget {
   final String? fotoUrl;
   final bool isLoading;
 
-  const _ProfilePhoto({
-    required this.fotoUrl,
-    required this.isLoading,
-  });
+  const _ProfilePhoto({required this.fotoUrl, required this.isLoading});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -306,11 +307,7 @@ class _ProfilePhoto extends ConsumerWidget {
                 : null,
           ),
           child: fotoUrl == null || fotoUrl!.isEmpty
-              ? const Icon(
-                  Icons.person,
-                  size: 60,
-                  color: Color(0xFF6B7280),
-                )
+              ? const Icon(Icons.person, size: 60, color: Color(0xFF6B7280))
               : null,
         ),
         Positioned(
@@ -334,11 +331,7 @@ class _ProfilePhoto extends ConsumerWidget {
                         color: Colors.white,
                       ),
                     )
-                  : const Icon(
-                      Icons.camera_alt,
-                      size: 18,
-                      color: Colors.white,
-                    ),
+                  : const Icon(Icons.camera_alt, size: 18, color: Colors.white),
             ),
           ),
         ),
@@ -364,8 +357,9 @@ class _ProfilePhoto extends ConsumerWidget {
           content: Text(
             success ? 'Foto actualizada' : 'Error al actualizar la foto',
           ),
-          backgroundColor:
-              success ? const Color(0xFF059669) : const Color(0xFFDC2626),
+          backgroundColor: success
+              ? const Color(0xFF059669)
+              : const Color(0xFFDC2626),
         ),
       );
     }
@@ -376,10 +370,7 @@ class _SectionCard extends StatelessWidget {
   final String title;
   final List<Widget> children;
 
-  const _SectionCard({
-    required this.title,
-    required this.children,
-  });
+  const _SectionCard({required this.title, required this.children});
 
   @override
   Widget build(BuildContext context) {
@@ -439,7 +430,9 @@ class _InfoTile extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: (titleColor ?? const Color(0xFF2563EB)).withValues(alpha: 0.1),
+                color: (titleColor ?? const Color(0xFF2563EB)).withValues(
+                  alpha: 0.1,
+                ),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -475,10 +468,7 @@ class _InfoTile extends StatelessWidget {
               ),
             ),
             if (showArrow)
-              const Icon(
-                Icons.chevron_right,
-                color: Color(0xFF6B7280),
-              ),
+              const Icon(Icons.chevron_right, color: Color(0xFF6B7280)),
           ],
         ),
       ),
@@ -522,9 +512,8 @@ class _NotificationSection extends ConsumerWidget {
                     _NotificationTile(
                       icon: Icons.notifications_outlined,
                       title: 'Notificaciones push',
-                      subtitle: state.hasPermission
-                          ? 'Activadas'
-                          : 'Desactivadas',
+                      subtitle:
+                          'Cuando alguien se registre a tus eventos${state.hasPermission ? 'Activadas' : 'Desactivadas'}',
                       trailing: Switch(
                         value: state.hasPermission,
                         onChanged: (value) async {
@@ -532,28 +521,15 @@ class _NotificationSection extends ConsumerWidget {
                             await ref
                                 .read(notificationProvider.notifier)
                                 .requestPermission();
+                          } else {
+                            await ref
+                                .read(notificationProvider.notifier)
+                                .disableNotifications();
                           }
                         },
                         activeTrackColor: const Color(0xFF2563EB),
                       ),
                     ),
-                    if (state.hasPermission) ...[
-                      const Divider(height: 1, indent: 74),
-                      _NotificationTile(
-                        icon: Icons.person_add_outlined,
-                        title: 'Nuevos registros',
-                        subtitle: 'Cuando alguien se registre a tus eventos',
-                        trailing: Switch(
-                          value: state.newEvents,
-                          onChanged: (value) {
-                            ref
-                                .read(notificationProvider.notifier)
-                                .toggleNewEvents(value);
-                          },
-                          activeTrackColor: const Color(0xFF2563EB),
-                        ),
-                      ),
-                    ],
                   ],
                 ),
         ),
@@ -588,11 +564,7 @@ class _NotificationTile extends StatelessWidget {
               color: const Color(0xFF2563EB).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              color: const Color(0xFF2563EB),
-              size: 22,
-            ),
+            child: Icon(icon, color: const Color(0xFF2563EB), size: 22),
           ),
           const SizedBox(width: 14),
           Expanded(
