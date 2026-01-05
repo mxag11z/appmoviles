@@ -64,10 +64,8 @@ class NotificationNotifier extends Notifier<NotificationState> {
 
     try {
       final service = ref.read(notificationServiceProvider);
-
       // Inicializar el servicio
       await service.initialize();
-
       // Solicitar permisos
       final hasPermission = await service.requestPermission();
 
@@ -75,12 +73,6 @@ class NotificationNotifier extends Notifier<NotificationState> {
         // Obtener y guardar token
         final token = await service.getToken();
         await service.saveTokenToSupabase();
-
-        // DEBUG: Imprime el token para probar en Firebase Console
-        print('═══════════════════════════════════════════');
-        print('FCM TOKEN (copia esto para probar):');
-        print(token);
-        print('═══════════════════════════════════════════');
 
         state = NotificationState(
           isInitialized: true,
@@ -113,6 +105,25 @@ class NotificationNotifier extends Notifier<NotificationState> {
 
     state = state.copyWith(hasPermission: hasPermission);
     return hasPermission;
+  }
+
+  /// Desactivar notificaciones (elimina el token de Supabase)
+  Future<void> disableNotifications() async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final service = ref.read(notificationServiceProvider);
+      await service.removeToken();
+      state = state.copyWith(
+        hasPermission: false,
+        isLoading: false,
+      );
+    } catch (e) {
+      print('Error desactivando notificaciones: $e');
+      state = state.copyWith(
+        isLoading: false,
+        error: e.toString(),
+      );
+    }
   }
 
   /// Limpiar token (al cerrar sesión)

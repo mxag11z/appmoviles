@@ -124,9 +124,7 @@ final GoRouter appRouter = GoRouter(
       ],
     ),
 
-    // =========================
-    // ORGANIZADOR (sin shell - pantallas que usan push/pop)
-    // =========================
+  
     GoRoute(
       path: "/organizador/registrar-evento",
       builder: (_, __) => const RegisterEventScreen(),
@@ -139,17 +137,13 @@ final GoRouter appRouter = GoRouter(
       },
     ),
 
-    // =========================
-    // ADMIN (sin shell por ahora)
-    // =========================
+
     GoRoute(
       path: "/admin/home",
       builder: (context, state) => const AdminShell(),
     ),
 
-    // =========================
-    // PÚBLICO (sin autenticación)
-    // =========================
+
     GoRoute(
       path: "/all-eventos",
       builder: (_, __) => const AllEventosScreen(),

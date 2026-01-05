@@ -209,17 +209,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
 
             // ═══════════════════════════════════════════════════════
-            // LISTA DE EVENTOS CON LAZY LOADING
+            // LISTA DE EVENTOS CON LAZY LOADING Y PULL-TO-REFRESH
             // ═══════════════════════════════════════════════════════
             Expanded(
-              child: filteredAsync.when(
-                loading: () => const Center(
-                  child: CircularProgressIndicator(),
-                ),
-                error: (e, stack) => Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  await ref.read(publishedEventsProvider.notifier).refresh();
+                },
+                child: filteredAsync.when(
+                  loading: () => ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const [
+                      SizedBox(height: 200),
+                      Center(child: CircularProgressIndicator()),
+                    ],
+                  ),
+                  error: (e, stack) => ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
                     children: [
+                      const SizedBox(height: 150),
                       const Icon(
                         Icons.error_outline,
                         size: 48,
@@ -231,60 +239,55 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         textAlign: TextAlign.center,
                         style: const TextStyle(color: Color(0xFF6B7280)),
                       ),
-                      const SizedBox(height: 8),
-                      ElevatedButton(
-                        onPressed: () {
-                          ref.invalidate(publishedEventsProvider);
-                        },
-                        child: const Text('Reintentar'),
+                      const SizedBox(height: 16),
+                      Center(
+                        child: ElevatedButton(
+                          onPressed: () {
+                            ref.invalidate(publishedEventsProvider);
+                          },
+                          child: const Text('Reintentar'),
+                        ),
                       ),
                     ],
                   ),
-                ),
-                data: (filteredEvents) {
-                  if (filteredEvents.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                  data: (filteredEvents) {
+                    if (filteredEvents.isEmpty) {
+                      return ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
                         children: [
+                          const SizedBox(height: 150),
                           const Icon(
                             Icons.search_off,
                             size: 64,
                             color: Color(0xFF6B7280),
                           ),
                           const SizedBox(height: 16),
-                          const Text(
-                            'No hay eventos que coincidan',
-                            style: TextStyle(
-                              color: Color(0xFF6B7280),
-                              fontSize: 16,
+                          const Center(
+                            child: Text(
+                              'No hay eventos disponibles',
+                              style: TextStyle(
+                                color: Color(0xFF6B7280),
+                                fontSize: 16,
+                              ),
                             ),
                           ),
-                          const SizedBox(height: 16),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              ref.read(publishedEventsProvider.notifier).refresh();
-                            },
-                            icon: const Icon(Icons.refresh),
-                            label: const Text('Actualizar'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2563EB),
-                              foregroundColor: Colors.white,
+                          const SizedBox(height: 8),
+                          const Center(
+                            child: Text(
+                              'Arrastra hacia abajo para actualizar',
+                              style: TextStyle(
+                                color: Color(0xFF9CA3AF),
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                         ],
-                      ),
-                    );
-                  }
+                      );
+                    }
 
-                  return RefreshIndicator(
-                    onRefresh: () async {
-                      await ref
-                          .read(publishedEventsProvider.notifier)
-                          .refresh();
-                    },
-                    child: ListView.separated(
+                    return ListView.separated(
                       controller: _scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
                       padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
                       itemCount: filteredEvents.length + 1, // +1 para el loader
                       separatorBuilder: (_, __) => const SizedBox(height: 12),
@@ -336,9 +339,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           },
                         );
                       },
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
           ],
