@@ -21,30 +21,27 @@ class CrudEventService {
     }
   }
 
-  //obeter una lista de los eventos (pending) del organizador actual
   Future<List<Evento>> obtenerEventos() async {
-    try {
-      final user = _supabase.auth.currentUser;
-      if (user == null) {
-        print('Usuario no autenticado');
-        return [];
-      }
+  try {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return [];
 
-      final response = await _supabase
-          .from('evento')
-          .select()
-          .eq('organizadorfk', user.id)
-          .inFilter('status_fk', [1])
-          .order('fechainicio', ascending: false);
+    final response = await _supabase
+        .from('evento')
+        .select('''
+          *,
+          categoria:categoriafk (nombre)
+        ''') 
+        .eq('organizadorfk', user.id)
+        .eq('status_fk', 1) 
+        .order('fechainicio', ascending: false);
 
-      print('obtenerEventos response: $response');
-
-      return response.map<Evento>((e) => Evento.fromMap(e)).toList();
-    } catch (e) {
-      print('Error obteniendo eventos: $e');
-      rethrow;
-    }
+    return response.map<Evento>((e) => Evento.fromMap(e)).toList();
+  } catch (e) {
+    print('Error obteniendo eventos: $e');
+    return [];
   }
+}
 
   //obeter una lista de los eventos aprobados del organizador actual
   Future<List<Evento>> obtenerEventosAprobados() async {
@@ -162,7 +159,7 @@ class CrudEventService {
 
       await _supabase
           .from('evento')
-          .update({'status_fk': 2}) //2 representa evento 'refused'
+          .update({'status_fk': 1}) //2 representa evento 'refused'
           .eq('id_evento', idEvento);
 
       return null;

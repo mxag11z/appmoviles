@@ -236,7 +236,7 @@ class _EventoCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          // IMAGEN (100% segura)
+          // IMAGEN 
           if (evento.foto != null && evento.foto!.isNotEmpty)
             ClipRRect(
               borderRadius: BorderRadius.circular(12),

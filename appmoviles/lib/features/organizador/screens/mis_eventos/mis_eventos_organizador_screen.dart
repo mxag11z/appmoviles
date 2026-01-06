@@ -479,7 +479,7 @@ class _EventoCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    evento.categoriaNombre,
+                    categorias[evento.categoriaFk] ?? 'Sin categoría',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -512,9 +512,10 @@ class _EventoCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      // Formato: DD/MM/YYYY HH:mm
+                      // Formato nuevo: Inicio - Fin
                       '${evento.fechaInicio.day}/${evento.fechaInicio.month}/${evento.fechaInicio.year} '
-                      '${evento.fechaInicio.hour}:${evento.fechaInicio.minute.toString().padLeft(2, "0")}',
+                      '${evento.fechaInicio.hour}:${evento.fechaInicio.minute.toString().padLeft(2, "0")} - '
+                      '${evento.fechaFin.hour}:${evento.fechaFin.minute.toString().padLeft(2, "0")}',
                       style: const TextStyle(
                         fontSize: 13,
                         color: Color(0xFF6B7280),
@@ -577,33 +578,29 @@ class _EventoCard extends StatelessWidget {
                 const SizedBox(height: 16),
 
                 // Botones
-                if (isPending)
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          onPressed: onRechazar,
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: const Color(0xFFDC2626),
-                            side: const BorderSide(color: Color(0xFFDC2626)),
-                          ),
-                          child: const Text('Rechazar'),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: onAprobar,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF059669),
-                            foregroundColor: Colors.white,
-                          ),
-                          child: const Text('Aprobar'),
-                        ),
-                      ),
-                    ],
-                  )
-                else
+                // if (isPending)
+                  // Row(
+                  //   children: [
+                  //     Expanded(
+                  //       child: OutlinedButton(
+                  //         onPressed: onRechazar,
+                  //         style: OutlinedButton.styleFrom(
+                  //           foregroundColor: const Color.fromARGB(
+                  //             255,
+                  //             26,
+                  //             59,
+                  //             194,
+                  //           ),
+                  //           side: const BorderSide(
+                  //             color: Color.fromARGB(255, 38, 71, 220),
+                  //           ),
+                  //         ),
+                  //         //child: const Text('Pre-publicar'),
+                  //       ),
+                  //     ),
+                  //   ],
+                  // )
+                // else
                   Row(
                     children: [
                       Expanded(
