@@ -24,7 +24,7 @@ class _AllEventosScreenState extends State<AllEventosScreen> {
   final CrudEventService eventService = CrudEventService();
   late Future<List<Evento>> _eventosFuture;
 
-  int _currentIndex = 1;
+  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -66,8 +66,10 @@ class _AllEventosScreenState extends State<AllEventosScreen> {
                   children: [
                     const Text(
                       'Filtros',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
 
                     const SizedBox(height: 12),
@@ -75,8 +77,7 @@ class _AllEventosScreenState extends State<AllEventosScreen> {
                     /// CATEGORÍA
                     DropdownButtonFormField<int>(
                       value: categoria,
-                      decoration:
-                          const InputDecoration(labelText: 'Categoría'),
+                      decoration: const InputDecoration(labelText: 'Categoría'),
                       items: categorias.entries.map((e) {
                         return DropdownMenuItem(
                           value: e.key,
@@ -92,8 +93,7 @@ class _AllEventosScreenState extends State<AllEventosScreen> {
 
                     /// UBICACIÓN
                     TextField(
-                      decoration:
-                          const InputDecoration(labelText: 'Ubicación'),
+                      decoration: const InputDecoration(labelText: 'Ubicación'),
                       onChanged: (value) => ubicacion = value,
                     ),
 
@@ -227,26 +227,22 @@ class _AllEventosScreenState extends State<AllEventosScreen> {
 
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
+        selectedItemColor: Colors.grey[600],
+        unselectedItemColor: Colors.grey[600],
         onTap: (index) {
-          if (index == _currentIndex) return;
-
-          setState(() => _currentIndex = index);
+          //if (index == _currentIndex) return;
 
           if (index == 0) {
             context.go('/onboarding');
           } else {
-            context.go('/register');
+            context.go('/login');
           }
+
+          setState(() => _currentIndex = index);
         },
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.login),
-            label: 'Iniciar',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.login), label: 'Iniciar'),
         ],
       ),
     );
@@ -262,8 +258,7 @@ class _EventoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final categoriaNombre =
-        categorias[evento.categoriaFk] ?? 'Sin categoría';
+    final categoriaNombre = categorias[evento.categoriaFk] ?? 'Sin categoría';
 
     final bool estaCerrado = evento.status == 2;
 
@@ -288,17 +283,19 @@ class _EventoCard extends StatelessWidget {
           children: [
             Text(
               evento.titulo,
-              style:
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
 
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
 
+            // categoría y cupo
             Row(
               children: [
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.blue.shade100,
                     borderRadius: BorderRadius.circular(20),
@@ -306,18 +303,57 @@ class _EventoCard extends StatelessWidget {
                   child: Text(
                     categoriaNombre,
                     style: const TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w600),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
+                const Icon(Icons.people_outline, size: 14, color: Colors.grey),
+                const SizedBox(width: 4),
                 Text(
                   'Cupo: ${evento.cupo}',
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            // ubicación
+            Row(
+              children: [
+                const Icon(
+                  Icons.location_on_outlined,
+                  size: 14,
+                  color: Colors.grey,
+                ),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    'Ubicación: ${evento.ubicacion}',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            // fecha y hora
+            Row(
+              children: [
+                const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                const SizedBox(width: 4),
                 Text(
-                  '  |  Ubicación: ${evento.ubicacion}',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                )
+                  '${_formatearFecha(evento.fechaInicio)} - ${_formatearFecha(evento.fechaFin)}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ],
             ),
 
@@ -368,7 +404,9 @@ class _EventoCard extends StatelessWidget {
                 child: Text(
                   'Evento cerrado',
                   style: TextStyle(
-                      color: Colors.red, fontWeight: FontWeight.w600),
+                    color: Colors.red,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
           ],
@@ -381,5 +419,7 @@ class _EventoCard extends StatelessWidget {
 /* ===================== UTIL ===================== */
 
 String _formatearFecha(DateTime fecha) {
-  return '${fecha.day}/${fecha.month}/${fecha.year}';
+  final hora = fecha.hour.toString().padLeft(2, '0');
+  final minuto = fecha.minute.toString().padLeft(2, '0');
+  return '${fecha.day}/${fecha.month}/${fecha.year} $hora:$minuto';
 }

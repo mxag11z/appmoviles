@@ -30,7 +30,7 @@ class _AsistentesEventosScreenState extends State<AsistentesEventosScreen> {
         title: const Text('Asistentes'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go("/organizador/eventos-aprobados"),
+          onPressed: () => context.go("/organizador/mis-eventos"),
         ),
       ),
       body: FutureBuilder<List<AsistenteEvento>>(

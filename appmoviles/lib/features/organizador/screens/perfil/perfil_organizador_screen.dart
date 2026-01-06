@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:appmoviles/services/storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -349,6 +350,9 @@ class _ProfilePhoto extends ConsumerWidget {
     if (picked == null) return;
 
     final file = File(picked.path);
+
+    // Aquí llamas al método que acabamos de arreglar arriba
+    // Este método ahora sí sube al bucket Y actualiza la DB
     final success = await ref.read(profileProvider.notifier).updateFoto(file);
 
     if (context.mounted) {

@@ -5,42 +5,17 @@ import '../data/models/evento_model.dart';
 class CrudEventService {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  //crear el evento
-  Future<String?> crearEvento({required Evento evento, File? imagen}) async {
+  /// Crear un nuevo evento
+  Future<String?> crearEvento({required Evento evento}) async {
     try {
-      // final user = _supabase.auth.currentUser;
-
-      // if (user == null) {
-      //   return 'Usuario no autenticado';
-      // }
-
-      String fotoUrl = '';
-
-      //si la imagen del evento si existe
-      if (imagen != null) {
-        final ext = imagen.path.split('.').last;
-        final fileName =
-            'eventos/${DateTime.now().millisecondsSinceEpoch}.$ext';
-
-        final uploadResponse = await _supabase.storage
-            .from('eventos')
-            .upload(fileName, imagen);
-
-        fotoUrl = _supabase.storage.from('eventos').getPublicUrl(fileName);
-      } else {
-        print('no hay imagen');
-      }
-
       final data = evento.toMap();
-      data['foto'] = fotoUrl;
 
-      data.forEach((k, v) => print('   $k → $v (${v.runtimeType})'));
+      await _supabase.from('evento').insert(data);
 
-      final response = await _supabase.from('evento').insert(data).select();
-
-      return null;
+      print('Inserción en base de datos exitosa');
+      return null; 
     } catch (e, stack) {
-      print(e);
+      print('Error en crearEvento (DB): $e');
       print(stack);
       return e.toString();
     }

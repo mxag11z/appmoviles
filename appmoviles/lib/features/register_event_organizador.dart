@@ -30,9 +30,10 @@ class _RegisterEventScreenState extends State<RegisterEventScreen> {
 
   int categoriaFk = 1; // default
   File? imagenEvento;
+  String? extensionImagen;
+  final storageService = StorageService();
 
   final picker = ImagePicker();
-  final storageService = StorageService();
 
   /// categorías estáticas (id → nombre)
   final categorias = const {
@@ -55,72 +56,102 @@ class _RegisterEventScreenState extends State<RegisterEventScreen> {
   }
 
   Future<void> pickFecha(bool inicio) async {
-    final date = await showDatePicker(
+    final DateTime? date = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
     );
-    if (date != null) {
-      setState(() {
-        inicio ? fechaInicio = date : fechaFin = date;
-      });
-    }
+
+    if (date == null) return;
+
+    if (!mounted) return;
+    final TimeOfDay? time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+
+    if (time == null) return;
+
+    final DateTime fechaHoraCompleta = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
+
+    setState(() {
+      inicio ? fechaInicio = fechaHoraCompleta : fechaFin = fechaHoraCompleta;
+    });
   }
 
+  /// Registrar evento
   Future<void> registrarEvento() async {
-
-    if (!_formKey.currentState!.validate()) {
-      print('form invalid');
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     if (fechaInicio == null || fechaFin == null) {
-      print('fechas null');
-      return;
-    }
-
-    //esto quedara ya cuando este el login y se haga una sesion
-    // final user = Supabase.instance.client.auth.currentUser;
-    // print('user: ${user?.id}');
-
-    final evento = Evento(
-      idEvento: '',
-      titulo: tituloCtrl.text.trim(),
-      descripcion: descripcionCtrl.text.trim(),
-      fechaInicio: fechaInicio!,
-      fechaFin: fechaFin!,
-      ubicacion: ubicacionCtrl.text.trim(),
-      cupo: cupo,
-      status: 'Pendiente',
-      organizadorFK: Supabase.instance.client.auth.currentUser?.id ?? '',
-      categoriaFk: categoriaFk,
-      categoriaNombre: categorias[categoriaFk] ?? 'General',
-      foto: '',
-    );
-
-    print('evento creado.....');
-
-    final error = await crudEventService.crearEvento(
-      evento: evento,
-      imagen: imagenEvento,
-    );
-
-    if (error != null) {
-      print('error...: $error');
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(error)));
+      ).showSnackBar(const SnackBar(content: Text("Selecciona las fechas")));
       return;
     }
 
-    print('evento registrado correctamente');
+    if (imagenEvento == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text("Selecciona una imagen")));
+      return;
+    }
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Evento registrado')));
+    try {
+      final String? urlPublica = await storageService.uploadEventImage(
+        imagenEvento!,
+      );
 
-    context.pop();
+      if (urlPublica == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Error al subir la imagen")),
+        );
+        return;
+      }
+
+      final evento = Evento(
+        idEvento: '', // Supabase lo genera
+        titulo: tituloCtrl.text.trim(),
+        descripcion: descripcionCtrl.text.trim(),
+        fechaInicio: fechaInicio!,
+        fechaFin: fechaFin!,
+        ubicacion: ubicacionCtrl.text.trim(),
+        cupo: cupo,
+        status: 'Pendiente',
+        organizadorFK: Supabase.instance.client.auth.currentUser?.id ?? '',
+        categoriaFk: categoriaFk,
+        categoriaNombre: categorias[categoriaFk] ?? 'General',
+        foto: urlPublica,
+      );
+
+      final error = await crudEventService.crearEvento(evento: evento);
+
+      if (error != null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error DB: $error")));
+        return;
+      }
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Evento registrado correctamente')),
+        );
+        context.pop();
+      }
+    } catch (e) {
+      print('Excepción: $e');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Ocurrio un error inesperado")));
+    }
   }
 
   @override
@@ -140,15 +171,19 @@ class _RegisterEventScreenState extends State<RegisterEventScreen> {
           key: _formKey,
           child: ListView(
             children: [
-              /// 📸 imagen
               Center(
                 child: GestureDetector(
                   onTap: () async {
-                    final img = await storageService.pickEventImage();
+                    final XFile? picked = await picker.pickImage(
+                      source: ImageSource.gallery,
+                      imageQuality: 70,
+                    );
 
-                    if (img != null) {
+                    if (picked != null) {
                       setState(() {
-                        imagenEvento = img;
+                        imagenEvento = File(picked.path);
+                        // Capturamos la extensión del nombre del archivo
+                        extensionImagen = picked.name.split('.').last;
                       });
                     }
                   },
