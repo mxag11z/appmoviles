@@ -1,18 +1,17 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'router/app_router.dart';
-import 'dart:io';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-//mio
 import 'package:flutter/foundation.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  /// cargando variables de entorno
-  await dotenv.load(fileName: ".env");
+  await dotenv.load(fileName: '.env');
 
   /// inicializacion de Firebase
   //await Firebase.initializeApp();
@@ -25,7 +24,7 @@ Future<void> main() async {
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL']!,
     anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
-  );
+  ); 
 
   /// forzando http en android en caso de ser necesario
   /// borrar el comenatio de abajo
@@ -49,14 +48,14 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
-        fontFamily: "Roboto",
+        fontFamily: 'Roboto',
       ),
       routerConfig: appRouter,
     );
   }
 }
 
-/// evitar errores SSL
+/// Evitar errores SSL en desarrollo (no usar en produccion).
 class MyHttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {

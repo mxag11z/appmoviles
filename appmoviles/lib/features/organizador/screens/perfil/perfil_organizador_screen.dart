@@ -516,9 +516,8 @@ class _NotificationSection extends ConsumerWidget {
                     _NotificationTile(
                       icon: Icons.notifications_outlined,
                       title: 'Notificaciones push',
-                      subtitle: state.hasPermission
-                          ? 'Activadas'
-                          : 'Desactivadas',
+                      subtitle:
+                          'Cuando alguien se registre a tus eventos${state.hasPermission ? 'Activadas' : 'Desactivadas'}',
                       trailing: Switch(
                         value: state.hasPermission,
                         onChanged: (value) async {
@@ -526,28 +525,15 @@ class _NotificationSection extends ConsumerWidget {
                             await ref
                                 .read(notificationProvider.notifier)
                                 .requestPermission();
+                          } else {
+                            await ref
+                                .read(notificationProvider.notifier)
+                                .disableNotifications();
                           }
                         },
                         activeTrackColor: const Color(0xFF2563EB),
                       ),
                     ),
-                    if (state.hasPermission) ...[
-                      const Divider(height: 1, indent: 74),
-                      _NotificationTile(
-                        icon: Icons.person_add_outlined,
-                        title: 'Nuevos registros',
-                        subtitle: 'Cuando alguien se registre a tus eventos',
-                        trailing: Switch(
-                          value: state.newEvents,
-                          onChanged: (value) {
-                            ref
-                                .read(notificationProvider.notifier)
-                                .toggleNewEvents(value);
-                          },
-                          activeTrackColor: const Color(0xFF2563EB),
-                        ),
-                      ),
-                    ],
                   ],
                 ),
         ),

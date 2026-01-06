@@ -22,6 +22,7 @@ import 'package:appmoviles/features/estudiante/screens/perfil/perfil_screen.dart
 import 'package:appmoviles/features/estudiante/screens/calendario/calendario_screen.dart';
 import 'package:appmoviles/data/models/evento_model.dart';
 
+import '../features/auth/screens/admin_shell.dart';
 
 class PlaceholderScreen extends StatelessWidget {
   final String text;
@@ -123,9 +124,7 @@ final GoRouter appRouter = GoRouter(
       ],
     ),
 
-    // =========================
-    // ORGANIZADOR (sin shell - pantallas que usan push/pop)
-    // =========================
+  
     GoRoute(
       path: "/organizador/registrar-evento",
       builder: (_, __) => const RegisterEventScreen(),
@@ -138,17 +137,13 @@ final GoRouter appRouter = GoRouter(
       },
     ),
 
-    // =========================
-    // ADMIN (sin shell por ahora)
-    // =========================
+
     GoRoute(
       path: "/admin/home",
-      builder: (_, __) => const PlaceholderScreen("Home Admin"),
+      builder: (context, state) => const AdminShell(),
     ),
 
-    // =========================
-    // PÚBLICO (sin autenticación)
-    // =========================
+
     GoRoute(
       path: "/all-eventos",
       builder: (_, __) => const AllEventosScreen(),

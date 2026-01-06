@@ -1,44 +1,64 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:appmoviles/data/models/carrera_model.dart';
 
 class CarrerasService {
-  final supabase = Supabase.instance.client;
+  final SupabaseClient supabase;
 
-  // Obtener todas las carreras
-  Future<List<CarreraModel>?> fetchCarreras() async {
+  CarrerasService({SupabaseClient? client})
+      : supabase = client ?? Supabase.instance.client;
+
+  /// Obtener todas las carreras (retorna lista vacia si no hay datos).
+  Future<List<CarreraModel>> fetchCarreras() async {
     try {
       final resp = await supabase.from('carrera').select().order('carrera');
-      print('fetchCarreras response: $resp');
+      debugPrint('fetchCarreras response: $resp');
       if (resp == null) return [];
       final List data = resp as List;
-      return data.map((e) => CarreraModel.fromMap(Map<String, dynamic>.from(e))).toList();
-    } catch (e) {
-      return null;
+      return data
+          .map((e) => CarreraModel.fromMap(Map<String, dynamic>.from(e)))
+          .toList();
+    } on PostgrestException catch (e) {
+      debugPrint('PostgrestException fetchCarreras: ${e.message}');
+      return [];
+    } catch (e, st) {
+      debugPrint('Error fetchCarreras: $e\n$st');
+      return [];
     }
   }
 
-  // Obtener una carrera por id
+  /// Obtener una carrera por id (retorna null si no existe).
   Future<CarreraModel?> fetchCarreraById(String id) async {
     try {
-      final resp = await supabase.from('carrera').select().eq('id_carrera', id).single();
+      final resp = await supabase
+          .from('carrera')
+          .select()
+          .eq('id_carrera', id)
+          .maybeSingle();
+      debugPrint('fetchCarreraById response: $resp');
       if (resp == null) return null;
       return CarreraModel.fromMap(Map<String, dynamic>.from(resp));
-    } catch (e) {
+    } on PostgrestException catch (e) {
+      debugPrint('PostgrestException fetchCarreraById: ${e.message}');
+      return null;
+    } catch (e, st) {
+      debugPrint('Error fetchCarreraById: $e\n$st');
       return null;
     }
   }
 
-  // Crear una nueva carrera.
+  /// Crear una nueva carrera. Retorna null si exito, o mensaje de error.
   Future<String?> createCarrera(CarreraModel carrera) async {
     try {
-      await supabase.from('carrera').insert(carrera.toMap());
+      final resp = await supabase.from('carrera').insert(carrera.toMap()).select();
+      debugPrint('createCarrera response: $resp');
       return null;
     } on PostgrestException catch (e) {
+      debugPrint('PostgrestException createCarrera: ${e.message}');
       return e.message;
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('Error createCarrera: $e\n$st');
       return e.toString();
     }
   }
-
 }

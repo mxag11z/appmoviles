@@ -39,7 +39,7 @@ class Evento {
       fechaFin: _parseDate(map['fechafin']),
       ubicacion: (map['ubicacion'] ?? '') as String,
       organizadorFK: (map['organizadorfk'] ?? '') as String,
-      status: (map['evento_status']?['nombre'] ?? '') as String,
+      status: (map['status_fk'] ?? '1').toString(),
       foto: map['foto'] as String?,
       cupo: map['cupo'] as int?,
     );
